@@ -31,7 +31,6 @@ Un semplice gestore delle spese familiari - A simple personal finance manager
 
 ## To do (ENG)
 - Set credits;
-- Add Italian language to Github;
 - Create wiki;
 - Insert recursive transaction;
 - Import&Export csv (with staging);
