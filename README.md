@@ -1,5 +1,5 @@
 # MManager
-Un semplice gestore delle spese familiari - A simple personal finance manager
+Un semplice gestore delle spese famigliari - A simple personal finance manager
 
 ## Come si installa
 1. Installa apache 2.4, php 7 e mysql (ad esempio architetture WAMP o LAMP);
@@ -7,7 +7,7 @@ Un semplice gestore delle spese familiari - A simple personal finance manager
 3. Crea il lo schema mysql;
 4. Imposta i valori di configurazione del DB nel file `config.php` (server, username, password, database);
 5. Collegati su `http://localhost/install.php` e premi il bottone `Installa`;
-6. Una volta completata la procedura collegati a `http://localhost/index.php` (la prima connessione è da fare con l'utente `admin/admin`);
+6. Una volta completata la procedura collegati a `http://localhost/index.php` (la prima connessione Ã¨ da fare con l'utente `admin/admin`);
 
 ## How to install
 1. Install apache 2.4, php 7 and mysql (WAMP or LAMP server);
