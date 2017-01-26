@@ -19,26 +19,8 @@ Un semplice gestore delle spese famigliari - A simple personal finance manager
 5. Connect to `http://localhost/install.php` and press the button `Install`;
 6. Once completed go to `http://localhost/index.php` and connect with `admin/admin`;
 
-## To do (ITA)
-- Impostare i ringraziamenti;
-- Creare il wiki;
-- Sviluppare le trasazioni ricorenti;
-- Sviluppare l'import&export delle transazioni;
-- Sviluppare la gestione dei portafogli;
-- Sviluppare il controllo di fine anno;
-- Sviluppare le spese previste;
-- Sviluppare la notifica mail a spesa inserita;
-- Sviluppare il caricamento degli scontrini;
-- Migliorare la traduzione dell'inglese;
-
-## To do (ENG)
-- Set credits;
-- Create wiki;
-- Insert recursive transaction;
-- Import&Export csv (with staging);
-- Wallet management;
-- End year check;
-- Future expenses;
-- Mail notify;
-- Bills upload;
-- Deploy a better english translation;
+## Thanks to
+- http://getbootstrap.com/
+- https://developers.google.com/chart/
+- https://datatables.net/
+- http://jscolor.com/
