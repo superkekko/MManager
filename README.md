@@ -11,6 +11,10 @@ Un semplice gestore delle spese famigliari - A simple personal finance manager
 5. Collegati su `http://localhost/install.php` e premi il bottone `Installa`;
 6. Una volta completata la procedura collegati a `http://localhost/index.php` (la prima connessione è da fare con l'utente `admin/admin`);
 
+## Come si aggiorna
+- Per aggiornare la versione web scaricare la relase più recente;
+- Per aggiornare il db andare in Impostazioni e cliccare su aggiornamento.
+
 ## How to install
 1. Install apache 2.4, php 7 and mysql (WAMP or LAMP server);
 2. Put the files in a folder (usually `mmanager` under `www`);
@@ -18,6 +22,10 @@ Un semplice gestore delle spese famigliari - A simple personal finance manager
 4. Set the correct value in `config.php` (server, username, password, database);
 5. Connect to `http://localhost/install.php` and press the button `Install`;
 6. Once completed go to `http://localhost/index.php` and connect with `admin/admin`;
+
+## How to update
+- To update the web version download the current relese;
+- To update the db go to Settings and press update.
 
 ## Thanks to
 - http://getbootstrap.com/
