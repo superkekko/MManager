@@ -12,7 +12,7 @@ Un semplice gestore delle spese famigliari - A simple personal finance manager
 6. Una volta completata la procedura collegati a `http://localhost/index.php` (la prima connessione è da fare con l'utente `admin/admin`);
 
 ## Come si aggiorna
-- Per aggiornare la versione web scaricare la relase più recente;
+- Per aggiornare la versione web scaricare la release più recente;
 - Per aggiornare il db andare in Impostazioni e cliccare su aggiornamento.
 
 ## How to install
@@ -24,7 +24,7 @@ Un semplice gestore delle spese famigliari - A simple personal finance manager
 6. Once completed go to `http://localhost/index.php` and connect with `admin/admin`;
 
 ## How to update
-- To update the web version download the current relese;
+- To update the web version download the current release;
 - To update the db go to Settings and press update.
 
 ## Thanks to
