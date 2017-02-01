@@ -1,5 +1,7 @@
 <?php
 
+$web_ver = '1.1';
+
 $error     = "";
 $error_cat = "";
 $parent_id = 0;
@@ -123,28 +125,44 @@ if (isset($_GET['mod_cat_id'])) {
     $row_cat_mod    = mysqli_fetch_array($result_cat_mod, MYSQLI_ASSOC);
 }
 
-$sql_version    = "select * from mversion v where v.upd=(select max(upd) from mversion);";
+$sql_version    = "select max(db) as db from mversion";
 $result_version = mysqli_query($db, $sql_version);
 $row_ver    = mysqli_fetch_array($result_version, MYSQLI_ASSOC);
 
-$update = file_exists('./update.sql');
+$directory = "./update/";
+$dir = opendir($directory);
+
+scandir($directory );
+$update = glob('./update/ver*.sql');
 $message = '';
 
-if (isset($_POST['update']) & $update) {
-$querys = explode("\n", file_get_contents("./update.sql"));
+if (isset($_POST['update'])) {
+while (($file = readdir($dir)) !== false) {
+  $filename = $directory . $file;
+  $type = filetype($filename);
+  $ver = strpos($filename, 'ver');
+  if ($type == 'file' & $ver !== false) {
+  $num_ver = substr($filename, $ver+4, strpos($filename, '.sql')-($ver+4));
+  if ($num_ver > $row_ver['db']){
+  $contents = file_get_contents($filename);
+  $querys = explode("\n", $contents);
     foreach ($querys as $q) {
       $q = trim($q);
       if (strlen($q)) {
-        $message .= substr($q,0,20).' -> ';
+        $message .= substr($q,0,40).' -> ';
 		$result = mysqli_query($db, $q);
 		if ($result){
 	     $message .= 'OK';
 		}else{
-		$message .= mysqli_error($db);
+		 $message .= mysqli_error($db);
 		};
-		$message .= '<br><br>';
-      }      
-    }
+		 $message .= '<br><br>';
+		}
+	}
+  }
+	rename($filename, './update/done/'.substr($filename, $ver, strlen($filename)-$ver));
+	} 
+}
 }
 ?>
 
@@ -431,7 +449,7 @@ while ($row_cat = mysqli_fetch_array($result_list_cat, MYSQLI_ASSOC)) {
 
 <div class="col-md-12">
 <div class="panel panel-default">
-    <div class="panel-heading"><?php echo $lang['71'].' (db_ver: '.$row_ver['db'].' web_ver: '.$row_ver['web'].')';?></div>
+    <div class="panel-heading"><?php echo $lang['71'].' (db_ver: '.$row_ver['db'].' web_ver: '.$web_ver.')';?></div>
     <div class="panel-body"><form name="update" method="post" action="settings.php" role="form">
         <fieldset>
           <div class="row">

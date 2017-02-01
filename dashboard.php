@@ -81,7 +81,16 @@ while ($row = mysqli_fetch_array($result_tot_cat)) {
     ]);
  var options = {
  title: '<?php echo $lang['16'];?>',
- legend: 'none'
+ legend: 'none',
+<?php
+$sql_col_cat = "select concat('#',color) as color from tot_cat where income <> 'S' and year = $year order by cat_id";
+$result_col_cat = mysqli_query($db, $sql_col_cat);
+$color = "";
+while ($row = mysqli_fetch_array($result_col_cat)) {
+$color .= '\''.$row['color'].'\',';
+}
+echo 'colors: ['.substr($color,0,strlen($color)-1).']';
+?>
  };
  var chart = new google.visualization.PieChart(document.getElementById("cat_chart"));
  chart.draw(data, options);
@@ -168,13 +177,13 @@ while ($row = mysqli_fetch_array($result_det_month)) {
  function drawChart() {
  var data = google.visualization.arrayToDataTable([
       ['<?php echo $lang['20'];?>', <?php
-$sql_cat    = "select group_concat(distinct cat_name order by cat_id separator '\',\'') as cat from tot_cat_date where year in ($year, 0) and income <> 'S'";
+$sql_cat    = "select group_concat(distinct concat('\'',cat_name,'\',{role:\'style\'}') order by cat_id separator ',') as cat from tot_cat_date where year in ($year, 0) and income <> 'S'";
 $result_cat = mysqli_query($db, $sql_cat);
 $row        = mysqli_fetch_array($result_cat);
-echo "'" . $row['cat'] . "'";
+echo $row['cat'];
 ?>],
  <?php
-$sql_det_cat    = "select month, group_concat(val order by cat_id separator ',') as val from (select sum(val) as val, cat_name, cat_id, income, month from tot_cat_date where year in ($year,0) and income <> 'S' group by cat_name, cat_id, income, month) t group by month";
+$sql_det_cat    = "select month, group_concat(concat(val,',\'#',color,'\'') order by cat_id separator ',') as val from (select sum(val) as val, cat_name, cat_id, color, income, month from tot_cat_date where year in ($year,0) and income <> 'S' group by cat_name, cat_id, color, income, month) t group by month";
 $result_det_cat = mysqli_query($db, $sql_det_cat);
 while ($row = mysqli_fetch_array($result_det_cat)) {
     echo "['" . $row['month'] . "'," . $row['val'] . "],";

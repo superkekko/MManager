@@ -76,7 +76,7 @@ $lang = array(
 				'68' => 'Father category',
 				'69' => 'Movements',
 				'71' => 'Upgrade DB',
-				'74' => 'Remove update.sql',
+				'74' => 'Reload page',
 				//install
 				'70' => 'Install',
 				'72' => 'Start',

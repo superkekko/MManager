@@ -77,7 +77,7 @@ $lang = array(
 				'68' => 'Categoria padre',
 				'69' => 'Movimenti',
 				'71' => 'Aggiorna DB',
-				'74' => 'Rimuovere il file update.sql',
+				'74' => 'Ricarica la pagina',
 				//install
 				'70' => 'Installa',
 				'72' => 'Accesso',
