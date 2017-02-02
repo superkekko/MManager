@@ -1,6 +1,6 @@
 <?php
 
-$web_ver = '1.1';
+$web_ver = '1.1.1';
 
 $error     = "";
 $error_cat = "";
@@ -160,7 +160,7 @@ while (($file = readdir($dir)) !== false) {
 		}
 	}
   }
-	rename($filename, './update/done/'.substr($filename, $ver, strlen($filename)-$ver));
+	unlink($filename);
 	} 
 }
 }
