@@ -1,6 +1,6 @@
 <?php
 
-$web_ver = '1.1.1';
+$web_ver = '1.2';
 
 $error     = "";
 $error_cat = "";
@@ -12,6 +12,10 @@ $result_cat = mysqli_query($db, $sql_cat);
 if (!isset($user)) {
     $user = $_SESSION['login_user'];
 }
+
+use \Colors\RandomColor;
+$color=RandomColor::one(array('format'=>'hex'));
+$color=substr($color,1,6);
 
 if (isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset($_POST['enable']) & isset($_POST['admin']) & !isset($_GET['mod_usr_id'])) {
     $usr    = mysqli_real_escape_string($db, $_POST['usr']);
@@ -25,7 +29,7 @@ if (isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset
     $count       = mysqli_num_rows($result_ver);
     
     if ($count == 0) {
-        $sql_usr = "insert into user (usr_id, email, passwd, valid, admin) values ('$usr', '$email', sha1('$pwd'), '$enable', '$admin')";
+        $sql_usr = "insert into user (usr_id, email, passwd, valid, admin, color) values ('$usr', '$email', sha1('$pwd'), '$enable', '$admin', '$color')";
         mysqli_query($db, $sql_usr);
         $error = $lang['47'];
     } else {
@@ -49,7 +53,7 @@ if (isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset
     }
     
     $page_name = basename($_SERVER['PHP_SELF']);
-    $error     = $lang['49'];
+    //$error     = $lang['49'];
     echo '<META HTTP-EQUIV="Refresh" Content="0; URL=' . $page_name . '">';
 }
 
@@ -105,7 +109,7 @@ if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income'])
     mysqli_query($db, $sql_usr);
     
     $page_name = basename($_SERVER['PHP_SELF']);
-    $error     = $lang['52'];
+    //$error     = $lang['52'];
     echo '<META HTTP-EQUIV="Refresh" Content="0; URL=' . $page_name . '">';
 }
 
@@ -326,7 +330,7 @@ if (isset($_GET['mod_cat_id'])) {
 if (isset($_GET['mod_cat_id'])) {
     echo 'value="' . $row_cat_mod['color'] . '"';
 } else {
-    echo 'value="000000"';
+    echo 'value="'.$color.'"';
 }
 ;
 ?>></div></div>

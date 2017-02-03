@@ -2,6 +2,8 @@
 
 include('./locale/'.$_SESSION['lang'].'.php');
 
+include ('RandomColor.php');
+
 $page_name = basename($_SERVER['PHP_SELF']);
 $year      = date('Y');
 

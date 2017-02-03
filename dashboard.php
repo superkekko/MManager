@@ -26,7 +26,7 @@ if (isset($_POST['category'])) {
  google.setOnLoadCallback(drawChart);
  function drawChart() {
  var data = google.visualization.arrayToDataTable([
-      ['Ingresso', 'Importo'],
+      ['<?php echo $lang['11'];?>', '<?php echo $lang['15'];?>'],
  <?php
  $income = $lang['11'];
  $outcome = $lang['12'];
@@ -38,22 +38,28 @@ while ($row = mysqli_fetch_array($result_tot)) {
 ?>
     ]);
  var options = {
- title: '<?php echo $lang['13'];?>',
+ chartArea: {
+   height: "75%",
+   left: "5%",
+   top: "5%",
+   width: "100%"
+  },
  legend: 'none',
+ pieHole: 0.4,
  <?php
 $sql_ver    = "select val from tot where year = $year and income='P'";
 $result_ver = mysqli_query($db, $sql_ver);
 $count      = mysqli_num_rows($result_ver);
 if ($count == 1) {
     echo "slices: {
-            0: { color: 'green' },
-            1: { color: 'red' }
+            0: { color: '#2ecc71' },
+            1: { color: '#e74c3c' }
           }
  };";
 } else {
     echo "slices: {
-            0: { color: 'red' },
-            1: { color: 'green' }
+            0: { color: '#e74c3c' },
+            1: { color: '#2ecc71' }
           }
  };";
 }
@@ -80,8 +86,14 @@ while ($row = mysqli_fetch_array($result_tot_cat)) {
 ?>
     ]);
  var options = {
- title: '<?php echo $lang['16'];?>',
+ chartArea: {
+   height: "75%",
+   left: "5%",
+   top: "5%",
+   width: "100%"
+  },
  legend: 'none',
+ pieHole: 0.4,
 <?php
 $sql_col_cat = "select concat('#',color) as color from tot_cat where income <> 'S' and year = $year order by cat_id";
 $result_col_cat = mysqli_query($db, $sql_col_cat);
@@ -113,8 +125,23 @@ while ($row = mysqli_fetch_array($result_tot_usr_spe)) {
 ?>
     ]);
  var options = {
- title: '<?php echo $lang['18'];?>',
- legend: 'none'
+ chartArea: {
+   height: "75%",
+   left: "5%",
+   top: "5%",
+   width: "100%"
+  },
+ legend: 'none',
+ pieHole: 0.4,
+<?php
+$sql_col_cat = "select concat('#',usr_color) as usr_color from tot_usr where income <> 'S' and year = $year order by usr_mov";
+$result_col_cat = mysqli_query($db, $sql_col_cat);
+$color = "";
+while ($row = mysqli_fetch_array($result_col_cat)) {
+$color .= '\''.$row['usr_color'].'\',';
+}
+echo 'colors: ['.substr($color,0,strlen($color)-1).']';
+?>
  };
  var chart = new google.visualization.PieChart(document.getElementById("tot_usr_spe_chart"));
  chart.draw(data, options);
@@ -137,8 +164,23 @@ while ($row = mysqli_fetch_array($result_tot_usr_ent)) {
 ?>
     ]);
  var options = {
- title: '<?php echo $lang['19'];?>',
- legend: 'none'
+ chartArea: {
+   height: "75%",
+   left: "5%",
+   top: "5%",
+   width: "100%"
+  },
+ legend: 'none',
+ pieHole: 0.4,
+<?php
+$sql_col_cat = "select concat('#',usr_color) as usr_color from tot_usr where income = 'S' and year = $year order by usr_mov";
+$result_col_cat = mysqli_query($db, $sql_col_cat);
+$color = "";
+while ($row = mysqli_fetch_array($result_col_cat)) {
+$color .= '\''.$row['usr_color'].'\',';
+}
+echo 'colors: ['.substr($color,0,strlen($color)-1).']';
+?>
  };
  var chart = new google.visualization.PieChart(document.getElementById("tot_usr_ent_chart"));
  chart.draw(data, options);
@@ -153,7 +195,7 @@ while ($row = mysqli_fetch_array($result_tot_usr_ent)) {
  var data = google.visualization.arrayToDataTable([
       ['<?php echo $lang['20'];?>', '<?php echo $lang['11'];?>', '<?php echo $lang['12'];?>'],
  <?php
-$sql_det_month    = "select * from tot_eu where year = $year order by month";
+$sql_det_month    = "select sum(income) as income, sum(outcome) as outcome, month from tot_eu where year in (0,$year) group by month order by CAST(month AS UNSIGNED)";
 $result_det_month = mysqli_query($db, $sql_det_month);
 while ($row = mysqli_fetch_array($result_det_month)) {
     echo "['" . $row['month'] . "'," . $row['income'] . "," . $row['outcome'] . "],";
@@ -161,8 +203,7 @@ while ($row = mysqli_fetch_array($result_det_month)) {
 ?>
     ]);
  var options = {
- title: '<?php echo $lang['21'];?>',
- colors: ['green', 'red'],
+ colors: ['#2ecc71', '#e74c3c'],
  legend: 'none'
  };
  var chart = new google.visualization.ColumnChart(document.getElementById("det_month_chart"));
@@ -191,7 +232,6 @@ while ($row = mysqli_fetch_array($result_det_cat)) {
 ?>
     ]);
  var options = {
- title: '<?php echo $lang['22'];?>',
  legend: 'none',
  isStacked: true
  };
@@ -207,35 +247,82 @@ echo '<p>'.$lang['10'].' <a href=?year=' . (date('Y') - 2) . '>' . (date('Y') - 
 ?></p>
 </div>
 
-<div class="row">
-  <div class="clearfix"></div>
-  <div class="col-md-6">
-    <div id="tot_chart" class="chart"></div>
-  </div>
-  <div class="col-md-6">
-    <div id="cat_chart" class="chart"></div>
-  </div>
-</div>
 
-<div class="row">
-  <div class="clearfix"></div>
-  <div class="col-md-6">
-    <div id="tot_usr_ent_chart" class="chart"></div>
-  </div>
-  <div class="col-md-6">
-    <div id="tot_usr_spe_chart" class="chart"></div>
-  </div>
-</div>
+  <div class="container-fluid">
 
-<div class="row">
-  <div class="clearfix"></div>
-  <div class="col-md-6">
-    <div id="det_month_chart" class="chart"></div>
+    <div class="row">
+      <div class="col-sm-8">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            <b><?php echo $lang['21'];?></b>
+          </div>
+          <div class="chart-stage">
+            <div id="grid-1-1">
+              <div id="det_month_chart" class="chart"></div>
+            </div>
+          </div>
+	   </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            <b><?php echo $lang['13'];?></b>
+          </div>
+          <div class="chart-stage">
+            <div id="tot_chart" class="chart"></div>
+          </div>
+        </div>
+      </div>
+   </div>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            <b><?php echo $lang['22'];?></b>
+          </div>
+          <div class="chart-stage">
+            <div id="grid-1-1">
+              <div id="det_cat_chart" class="chart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6 col-md-4">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            <b><?php echo $lang['18'];?></b>
+          </div>
+          <div class="chart-stage">
+            <div id="tot_usr_spe_chart" class="chart"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-4">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            <b><?php echo $lang['19'];?></b>
+          </div>
+          <div class="chart-stage">
+            <div id="tot_usr_ent_chart" class="chart"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-4">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            <b><?php echo $lang['16'];?></b>
+          </div>
+          <div class="chart-stage">
+            <div id="cat_chart" class="chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-md-6">
-    <div id="det_cat_chart" class="chart"></div>
-  </div>
-</div>
 
 </body>
 </html>
