@@ -1,6 +1,6 @@
 <?php
 
-$web_ver = '1.3';
+$web_ver = '1.4';
 
 $error     = "";
 $error_cat = "";
@@ -14,11 +14,15 @@ if (!isset($user)) {
 }
 
 use \Colors\RandomColor;
+$usr_color=RandomColor::one(array('format'=>'hex'));
+$usr_color=substr($usr_color,1,6);
+
 $color=RandomColor::one(array('format'=>'hex'));
 $color=substr($color,1,6);
 
-if (isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset($_POST['enable']) & isset($_POST['admin']) & !isset($_GET['mod_usr_id'])) {
-    $usr    = mysqli_real_escape_string($db, $_POST['usr']);
+if (isset($_POST['usr_color']) & isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset($_POST['enable']) & isset($_POST['admin']) & !isset($_GET['mod_usr_id'])) {
+    $usr_color_commit    = mysqli_real_escape_string($db, $_POST['usr_color']);
+	$usr    = mysqli_real_escape_string($db, $_POST['usr']);
     $email  = mysqli_real_escape_string($db, $_POST['email']);
     $pwd    = mysqli_real_escape_string($db, $_POST['pwd']);
     $enable = mysqli_real_escape_string($db, $_POST['enable']);
@@ -29,7 +33,7 @@ if (isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset
     $count       = mysqli_num_rows($result_ver);
     
     if ($count == 0) {
-        $sql_usr = "insert into user (usr_id, email, passwd, valid, admin, color) values ('$usr', '$email', sha1('$pwd'), '$enable', '$admin', '$color')";
+        $sql_usr = "insert into user (usr_id, email, passwd, valid, admin, color) values ('$usr', '$email', sha1('$pwd'), '$enable', '$admin', '$usr_color_commit')";
         mysqli_query($db, $sql_usr);
         $error = $lang['47'];
     } else {
@@ -37,14 +41,15 @@ if (isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset
     }
 }
 
-if (isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset($_POST['enable']) & isset($_POST['admin']) & isset($_GET['mod_usr_id'])) {
-    $usr    = mysqli_real_escape_string($db, $_POST['usr']);
+if (isset($_POST['usr_color']) & isset($_POST['usr']) & isset($_POST['email']) & isset($_POST['pwd']) & isset($_POST['enable']) & isset($_POST['admin']) & isset($_GET['mod_usr_id'])) {
+    $usr_color_commit    = mysqli_real_escape_string($db, $_POST['usr_color']);
+	$usr    = mysqli_real_escape_string($db, $_POST['usr']);
     $email  = mysqli_real_escape_string($db, $_POST['email']);
     $pwd    = mysqli_real_escape_string($db, $_POST['pwd']);
     $enable = mysqli_real_escape_string($db, $_POST['enable']);
     $admin  = mysqli_real_escape_string($db, $_POST['admin']);
     
-    $sql_usr = "update user set email='$email', valid='$enable', admin='$admin' where usr_id='$usr'";
+    $sql_usr = "update user set email='$email', valid='$enable', admin='$admin', color='$usr_color_commit' where usr_id='$usr'";
     mysqli_query($db, $sql_usr);
     
     if ($pwd <> '') {
@@ -74,7 +79,7 @@ $sql_list_usr    = "select * from user";
 $result_list_usr = mysqli_query($db, $sql_list_usr);
 
 if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income']) & isset($_POST['parent_id']) & !isset($_GET['mod_cat_id'])) {
-    $color     = mysqli_real_escape_string($db, $_POST['color']);
+    $cat_color     = mysqli_real_escape_string($db, $_POST['color']);
     $cat_name  = mysqli_real_escape_string($db, $_POST['cat_name']);
     $parent_id = mysqli_real_escape_string($db, $_POST['parent_id']);
     if ($parent_id == " ") {
@@ -90,7 +95,7 @@ if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income'])
     $count      = mysqli_num_rows($result_ver);
     
     if ($count == 0) {
-        $sql_usr = "insert into category (color, cat_name, parent_id, income) values ('$color', '$cat_name', $parent_id, '$income')";
+        $sql_usr = "insert into category (color, cat_name, parent_id, income) values ('$cat_color', '$cat_name', $parent_id, '$income')";
         mysqli_query($db, $sql_usr);
         $error_cat = $lang['50'];
     } else {
@@ -100,12 +105,12 @@ if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income'])
 
 if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income']) & isset($_POST['parent_id']) & isset($_GET['mod_cat_id'])) {
     $cat       = mysqli_real_escape_string($db, $_GET['mod_cat_id']);
-    $color     = mysqli_real_escape_string($db, $_POST['color']);
+    $cat_color     = mysqli_real_escape_string($db, $_POST['color']);
     $cat_name  = mysqli_real_escape_string($db, $_POST['cat_name']);
     $parent_id = mysqli_real_escape_string($db, $_POST['parent_id']);
     $income    = mysqli_real_escape_string($db, $_POST['income']);
     
-    $sql_usr = "update category set color='$color', cat_name='$cat_name', parent_id=$parent_id, income='$income' where cat_id=$cat";
+    $sql_usr = "update category set color='$cat_color', cat_name='$cat_name', parent_id=$parent_id, income='$income' where cat_id=$cat";
     mysqli_query($db, $sql_usr);
     
     $page_name = basename($_SERVER['PHP_SELF']);
@@ -180,6 +185,17 @@ if (isset($_GET['mod_usr_id'])) {
 ;
 ?>" role="form">
         <div class="row">
+		    <div class="col-xs-2">
+            <div class="input-group">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-eye-open"></span></span>
+					<input name="usr_color" id="usr_color" class="form-control jscolor" <?php
+if (isset($_GET['mod_usr_id'])) {
+    echo 'value="' . $row_usr_mod['color'] . '"';
+} else {
+    echo 'value="'.$usr_color.'"';
+}
+;
+?>></div></div>
             <div class="col-xs-2">
                 <div class="input-group">
                     <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
@@ -202,7 +218,7 @@ if (isset($_GET['mod_usr_id'])) {
 }
 ;
 ?>></div></div>
-					<div class="col-xs-3">
+					<div class="col-xs-2">
                 <div class="input-group">
                     <span class="input-group-addon"><span class="glyphicon glyphicon-sunglasses"></span></span>
 					<input type="password" name="pwd" id="pwd" class="form-control" placeholder="<?php echo $lang['02'];?>"></div></div>
