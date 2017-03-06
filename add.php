@@ -1,4 +1,29 @@
 <?php
+if (file_exists('upload.log')) {
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="'.basename('upload.log').'"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: ' . filesize('upload.log'));
+    readfile('upload.log');
+	unlink('upload.log');
+    exit;
+}
+if (file_exists('import.log')) {
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="'.basename('import.log').'"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: ' . filesize('import.log'));
+    readfile('import.log');
+	unlink('import.log');
+    exit;
+}
+
 include('session.php');
 include('header.html');
 include('nav.php');
@@ -47,12 +72,66 @@ if (isset($result_mov)) {
         $error = $lang['23'];
     }
 }
+
+if(isset($_FILES['file']['tmp_name'])) {
+if(is_uploaded_file($_FILES['file']['tmp_name']))
+{
+ $err=0;
+ $file = $_FILES['file']['tmp_name'];
+ $handle = fopen($file, "r");
+ $c = 0;
+ $i = 0;
+ 
+ $sql_del = "delete from importcsv";
+ mysqli_query($db, $sql_del);
+ 
+ while(($filesop = fgetcsv($handle, 1000, ";")) !== false)
+ {
+ $dat_mov = mysqli_real_escape_string($db, $filesop[0]);
+ $description = mysqli_real_escape_string($db, $filesop[1]);
+ $value = str_replace('.', '', mysqli_real_escape_string($db, $filesop[2]));
+
+ if ($i>0){ 
+ $sql_file = "INSERT INTO importcsv (dat_mov, description, value, usr_mov) VALUES ('$dat_mov', '$description', '$value', '$user')";
+ $result_sql = mysqli_query($db, $sql_file);
+ if (!$result_sql){
+ if ($err==0){
+ $filename='upload.log';
+ $log = "Upload log ".date('d/m/Y h:m:s')."\n";
+ $err = 1;
+ }
+ $log .= "not loaded (".mysqli_error($db)."): ".$dat_mov." | ".$description." | ".$value."\n";
+ }
+ }
+ $i=$i+1;
+ if ($err==1){
+ file_put_contents($filename, $log);
+ }
+ }
+ $sql_file = "CALL csv_import()";
+ mysqli_query($db, $sql_file);
+ 
+ $sql_ver = "select * from importcsv c where c.mov_imp = ''";
+ $result_ver = mysqli_query($db, $sql_ver);
+ $count      = mysqli_num_rows($result_ver);
+ echo $count;
+ if ($count > 0){
+ $filename_imp='import.log';
+ $imp = "Import log ".date('d/m/Y h:m:s')."\n";
+ while ($res_usr = mysqli_fetch_array($result_ver, MYSQLI_ASSOC)){
+ $imp .= "not imported: ".$res_usr['dat_mov']." | ".$res_usr['description']." | ".$res_usr['value']."\n";
+ }
+ file_put_contents($filename_imp, $imp);
+ }
+ echo '<META HTTP-EQUIV="Refresh" Content="0; URL=add.php">';
+}
+}
+
 ?>
 
-<div class="container">
-  <div class="row" style="margin-top:20px; margin-bottom:20px">
-    <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
-      <form name="form_insert" method="post" action="add.php" role="form">
+<div class="container col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3" style="margin-top:20px; margin-bottom:20px">
+  <div class="row">
+      <form name="form_insert" method="post" action="add.php" role="form" enctype="multipart/form-data">
         <fieldset>
           <div class="form-group">
 		    <label for="category"><?php echo $lang['14'];?></label>
@@ -108,6 +187,10 @@ while ($row_user = mysqli_fetch_array($result_user, MYSQLI_ASSOC)) {
             <span class="input-group-addon"><span class="glyphicon glyphicon-pencil"></span></span>
             <textarea name="note" type="note" id="note" class="form-control" placeholder=" "></textarea>
           </div></div>
+          <div class="form-group">
+		    <label for="file"><?php echo $lang['75'];?> <a href="#" class="tooltip-large" title="<?php echo $lang['77'];?>"><span class="glyphicon glyphicon-info-sign"></span></a></label>
+			<input type="file" name="file" class="filestyle" data-buttonBefore="true" data-buttonText="<?php echo $lang['76'];?>">
+          </div>
             <div><input type="submit" name="submit" value="<?php echo $lang['44'];?>" class="btn btn-default"> 
 			<input type="reset" name="submit" value="<?php echo $lang['45'];?>" class="btn btn-default"></div>
 			<div <?php
@@ -115,7 +198,6 @@ echo $error;
 ?></div>
         </fieldset>
       </form>
-    </div>
 </div>
 </div>
 </body>

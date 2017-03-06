@@ -1,6 +1,6 @@
 <?php
 
-$web_ver = '1.4';
+$web_ver = '1.5';
 
 $error     = "";
 $error_cat = "";
@@ -78,10 +78,12 @@ if (isset($_GET['mod_usr_id'])) {
 $sql_list_usr    = "select * from user";
 $result_list_usr = mysqli_query($db, $sql_list_usr);
 
-if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income']) & isset($_POST['parent_id']) & !isset($_GET['mod_cat_id'])) {
+if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income']) & isset($_POST['parent_id']) & isset($_POST['cat_key']) & !isset($_GET['mod_cat_id'])) {
     $cat_color     = mysqli_real_escape_string($db, $_POST['color']);
     $cat_name  = mysqli_real_escape_string($db, $_POST['cat_name']);
     $parent_id = mysqli_real_escape_string($db, $_POST['parent_id']);
+    $cat_key = mysqli_real_escape_string($db, $_POST['cat_key']);
+	
     if ($parent_id == " ") {
         $sql_pid    = "select max(cat_id) as cat_id_max from category";
         $result_pid = mysqli_query($db, $sql_pid);
@@ -95,7 +97,7 @@ if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income'])
     $count      = mysqli_num_rows($result_ver);
     
     if ($count == 0) {
-        $sql_usr = "insert into category (color, cat_name, parent_id, income) values ('$cat_color', '$cat_name', $parent_id, '$income')";
+        $sql_usr = "insert into category (color, cat_name, parent_id, income, keyword) values ('$cat_color', '$cat_name', $parent_id, '$income', '$cat_key')";
         mysqli_query($db, $sql_usr);
         $error_cat = $lang['50'];
     } else {
@@ -103,14 +105,15 @@ if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income'])
     }
 }
 
-if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income']) & isset($_POST['parent_id']) & isset($_GET['mod_cat_id'])) {
+if (isset($_POST['color']) & isset($_POST['cat_name']) & isset($_POST['income']) & isset($_POST['parent_id']) & isset($_POST['cat_key']) & isset($_GET['mod_cat_id'])) {
     $cat       = mysqli_real_escape_string($db, $_GET['mod_cat_id']);
     $cat_color     = mysqli_real_escape_string($db, $_POST['color']);
     $cat_name  = mysqli_real_escape_string($db, $_POST['cat_name']);
     $parent_id = mysqli_real_escape_string($db, $_POST['parent_id']);
     $income    = mysqli_real_escape_string($db, $_POST['income']);
-    
-    $sql_usr = "update category set color='$cat_color', cat_name='$cat_name', parent_id=$parent_id, income='$income' where cat_id=$cat";
+    $cat_key = mysqli_real_escape_string($db, $_POST['cat_key']);
+	
+    $sql_usr = "update category set color='$cat_color', cat_name='$cat_name', parent_id=$parent_id, income='$income', keyword = '$cat_key' where cat_id=$cat";
     mysqli_query($db, $sql_usr);
     
     $page_name = basename($_SERVER['PHP_SELF']);
@@ -350,7 +353,7 @@ if (isset($_GET['mod_cat_id'])) {
 }
 ;
 ?>></div></div>
-                    <div class="col-xs-4">
+                    <div class="col-xs-2">
 				<div class="input-group">
                     <span class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></span>
                     <input type="text" name="cat_name" id="cat_name" class="form-control" <?php
@@ -361,7 +364,7 @@ if (isset($_GET['mod_cat_id'])) {
 }
 ;
 ?>></div></div>
-					<div class="col-xs-3">
+					<div class="col-xs-2">
 				<div class="input-group">
                     <span class="input-group-addon"><span class="glyphicon glyphicon-flag"></span></span>
 			<select type="text" name="parent_id" id="parent_id" class="form-control" <?php
@@ -385,6 +388,17 @@ while ($row_cat = mysqli_fetch_array($result_cat, MYSQLI_ASSOC)) {
 }
 ?>
 			</select></div></div>
+                    <div class="col-xs-3">
+				<div class="input-group">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></span>
+                    <input type="text" name="cat_key" id="cat_key" class="form-control" <?php
+if (isset($_GET['mod_cat_id'])) {
+    echo 'value="' . $row_cat_mod['keyword'] . '"';
+} else {
+    echo 'placeholder="'.$lang['78'].'"';
+}
+;
+?>></div></div>
 					<div class="col-xs-2">
 				<div class="input-group">
                     <span class="input-group-addon"><span class="glyphicon glyphicon-transfer"></span></span>
@@ -435,6 +449,7 @@ echo $error_cat;
             <th><?php echo $lang['68'];?></th>
             <th><?php echo $lang['11'];?></th>
 			<th><?php echo $lang['69'];?></th>
+			<th><?php echo $lang['78'];?></th>
 			<th><?php echo $lang['63'];?></th>
         </tr>
     </thead>
@@ -452,7 +467,7 @@ while ($row_cat = mysqli_fetch_array($result_list_cat, MYSQLI_ASSOC)) {
     }
     ;
     echo '</td>
-	   <td>' . $row_cat['num_mov'] . '</td>';
+	   <td>' . $row_cat['num_mov'] . '</td><td>' . $row_cat['keyword'] . '</td>';
     if ($row_cat['num_mov'] > 0 || $row_cat['have_ch'] == 'S') {
         echo '<td>'.$lang['41'].' | <a href="?mod_cat_id=' . $row_cat['cat_id'] . '">'.$lang['58'].'</a></td></tr>';
     } else {

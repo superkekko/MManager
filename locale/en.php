@@ -31,6 +31,9 @@ $lang = array(
 				'24' => 'Expense date',
 				'25' => 'Note',
 				'45' => 'Reset',
+				'75' => 'Load from csv',
+				'76' => 'Upload',
+				'77' => 'The file mus contain: date (GG/MM/YYYY); description; value (\',\' for decimal)',
 				//transaction.php
 				'26' => 'Show _MENU_ row per page',
 				'27' => 'Not found',
@@ -77,6 +80,7 @@ $lang = array(
 				'69' => 'Movements',
 				'71' => 'Upgrade DB',
 				'74' => 'Reload page',
+				'78' => 'Keywords (sep. \',\')',
 				//install
 				'70' => 'Install',
 				'72' => 'Start',
