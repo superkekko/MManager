@@ -1,7 +1,7 @@
 # MManager
 Un semplice gestore delle spese famigliari - A simple personal finance manager
 
-![dashboard](https://cloud.githubusercontent.com/assets/25342565/22334682/e5c9b9c6-e3db-11e6-94cb-4c2d4449be99.png)
+![dashboard](https://cloud.githubusercontent.com/assets/25342565/23645958/0a9dc4a2-030f-11e7-82ae-bd34b80f13e9.png)
 
 ## Come si installa
 1. Installa apache 2.4, php 7 e mysql (ad esempio architetture WAMP o LAMP);
