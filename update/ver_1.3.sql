@@ -1,5 +1,5 @@
 ALTER TABLE category ADD COLUMN keyword TEXT NOT NULL AFTER income;
-create table importcsv (imp_key INT NOT NULL AUTO_INCREMENT, dat_mov varchar(100) not null, description varchar(1000) not null, value varchar(100) not null, usr_mov varchar(20) not null, mov_imp char(1)not null default '');
+create table importcsv (imp_key INT(10) NOT NULL AUTO_INCREMENT, dat_mov varchar(100) not null, description varchar(1000) not null, value varchar(100) not null, usr_mov varchar(20) not null, mov_imp char(1)not null default '', PRIMARY KEY (imp_key))AUTO_INCREMENT=1;
 ALTER TABLE movement CHANGE COLUMN note note TEXT NOT NULL;
 ALTER TABLE movement ADD COLUMN imp_key INT(10) NOT NULL DEFAULT 0 AFTER tms_upd;
 CREATE FUNCTION SPLIT_STR( x VARCHAR(255), delim VARCHAR(12), pos INT ) RETURNS varchar(255) CHARSET utf8 RETURN REPLACE(SUBSTRING(SUBSTRING_INDEX(x, delim, pos), CHAR_LENGTH(SUBSTRING_INDEX(x, delim, pos -1)) + 1), delim, '');
