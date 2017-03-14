@@ -62,13 +62,50 @@ if (isset($_POST['user'])) {
     $usr_mov = mysqli_real_escape_string($db, $_POST['user']);
 }
 
-if (isset($cat) & isset($value) & isset($date) & isset($note) & isset($usr_mov)) {
+if (isset($_POST['id_mov'])) {
+    $id_mov = mysqli_real_escape_string($db, $_POST['id_mov']);
+}
+
+$mov_id = 0;
+
+if (isset($_GET['mod_mov_id'])){
+ $mov_id = mysqli_real_escape_string($db, $_GET['mod_mov_id']);
+ $sql_mod_mov = "select * from movement where mov_id = $mov_id";
+ $result_mod_mov = mysqli_query($db, $sql_mod_mov);
+ while ($res_mod_mov = mysqli_fetch_array($result_mod_mov, MYSQLI_ASSOC)){
+ $cat_mov = $res_mod_mov ['cat_id'];
+ 
+ $sql_cat_mov    = "select * from category where cat_id = $cat_mov";
+ $result_cat_mov = mysqli_query($db, $sql_cat_mov);
+ while ($res_cat_mov = mysqli_fetch_array($result_cat_mov, MYSQLI_ASSOC)){
+ if ($res_cat_mov['cat_id'] == $res_cat_mov['parent_id']){
+  $cat_name_mov = $res_cat_mov['cat_name'];
+ }else{
+  $cat_name_mov = '- '.$res_cat_mov['cat_name'];
+ }}
+ $val_mov = $res_mod_mov ['val'];
+ $dat_mov = $res_mod_mov ['dat_mov'];
+ $note_mov = $res_mod_mov ['note'];
+ $usr_mov = $res_mod_mov ['usr_mov'];}
+}
+
+if (isset($cat) & isset($value) & isset($date) & isset($note) & isset($usr_mov) & isset($id_mov)) {
+    $sql_mov_mod    = "update movement set cat_id = $cat, val = $value, type = '$type', dat_mov = '$date', note = '$note', usr_mov = '$usr_mov', usr_id = '$user' where mov_id = $id_mov";
+    $result_mov_mod = mysqli_query($db, $sql_mov_mod);
+}
+elseif (isset($cat) & isset($value) & isset($date) & isset($note) & isset($usr_mov) & !isset($id_mov)) {
     $sql_mov    = "insert into movement (cat_id, val, type, dat_mov, note, usr_mov, usr_id) values ($cat, $value, '$type', '$date', '$note', '$usr_mov', '$user')";
     $result_mov = mysqli_query($db, $sql_mov);
 }
 
 if (isset($result_mov)) {
     if (!$result_mov) {
+        $error = $lang['23'];
+    }
+}
+
+if (isset($result_mov_mod)) {
+    if (!$result_mov_mod) {
         $error = $lang['23'];
     }
 }
@@ -126,10 +163,9 @@ if(is_uploaded_file($_FILES['file']['tmp_name']))
  echo '<META HTTP-EQUIV="Refresh" Content="0; URL=add.php">';
 }
 }
-
 ?>
 
-<div class="container col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3" style="margin-top:20px; margin-bottom:20px">
+<div class="container col-xs-10 col-sm-8 col-md-6 col-xs-offset-1 col-sm-offset-2 col-md-offset-3" style="margin-top:20px; margin-bottom:20px">
   <div class="row">
       <form name="form_insert" method="post" action="add.php" role="form" enctype="multipart/form-data">
         <fieldset>
@@ -138,12 +174,13 @@ if(is_uploaded_file($_FILES['file']['tmp_name']))
 			<div class="input-group">
             <span class="input-group-addon"><span class="glyphicon glyphicon-tag"></span></span>
 			<select name="category" type="category"  id="category" class="form-control">
+			<?php if ($mov_id != 0){echo '<option value="'.$cat_mov.'">'.$cat_name_mov.'</option>';}?>
 			<option value=" "> </option>
 			<?php
 while ($row_cat = mysqli_fetch_array($result_cat, MYSQLI_ASSOC)) {
-    if ($row_cat['cat_id'] == $row_cat['parent_id']) {
+    if ($row_cat['cat_id'] == $row_cat['parent_id'] & $row_cat['cat_id'] != $cat_mov) {
         echo '<option value="' . $row_cat['cat_id'] . '">' . $row_cat['cat_name'] . '</option>';
-    } else {
+    } elseif ($row_cat['cat_id'] != $cat_mov) {
         echo '<option value="' . $row_cat['cat_id'] . '"> - ' . $row_cat['cat_name'] . '</option>';
     }
 }
@@ -154,29 +191,30 @@ while ($row_cat = mysqli_fetch_array($result_cat, MYSQLI_ASSOC)) {
 		    <label for="value"><?php echo $lang['15'];?></label>
 			<div class="input-group">
             <span class="input-group-addon"><span class="glyphicon glyphicon-piggy-bank"></span></span>
-            <input name="value" type="number" min="-99999" max="99999" step="0.01" id="value" class="form-control" placeholder="-100,00 &euro;">
+			<?php if ($mov_id != 0){echo '<input name="value" type="number" min="-99999" max="99999" step="0.01" id="value" value ="'.$val_mov.'" class="form-control">';}
+			else {echo '<input name="value" type="number" min="-99999" max="99999" step="0.01" id="value" class="form-control" placeholder="-100,00 &euro;">';}?>
           </div></div>
           <div class="form-group">
 		    <label for="date"><?php echo $lang['24'];?></label>
 			<div class="input-group">
             <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
-            <input name="date" type="date" id="date" min="2000-01-01" class="form-control" value="<?php
-echo date("Y-m-d");
-?>">
+            <?php if ($mov_id != 0){echo '<input name="date" type="date" id="date" min="2000-01-01" class="form-control" value="'.$dat_mov.'">';}
+			else {echo '<input name="date" type="date" id="date" min="2000-01-01" class="form-control" value="'.date("Y-m-d").'">';}?>
           </div></div>
           <div class="form-group">
 		    <label for="user"><?php echo $lang['17'];?></label>
 			<div class="input-group">
             <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
 			<select name="user" type="user"  id="user" class="form-control">
-			<option value="<?php
-echo $user;
-?>"><?php
-echo $user;
-?></option>
+			<?php if ($mov_id != 0){echo '<option value="'.$usr_mov.'">'.$usr_mov.'</option>';}?>;
+			<?php if ($user != $usr_mov){
+			echo '<option value="'.$user.'">'.$user.'</option>';
+			}?>
 			<?php
 while ($row_user = mysqli_fetch_array($result_user, MYSQLI_ASSOC)) {
+	if ($row_user['usr_id'] != $usr_mov) {
     echo '<option value="' . $row_user['usr_id'] . '">' . $row_user['usr_id'] . '</option>';
+	}
 }
 ?>
 			</select>
@@ -185,8 +223,10 @@ while ($row_user = mysqli_fetch_array($result_user, MYSQLI_ASSOC)) {
 		    <label for="note"><?php echo $lang['25'];?></label>
 			<div class="input-group">
             <span class="input-group-addon"><span class="glyphicon glyphicon-pencil"></span></span>
-            <textarea name="note" type="note" id="note" class="form-control" placeholder=" "></textarea>
+            <?php if ($mov_id != 0){echo '<textarea name="note" type="note" id="note" class="form-control" placeholder=" ">'.$note_mov.'</textarea>';}
+			else{echo'<textarea name="note" type="note" id="note" class="form-control" placeholder=" "></textarea>';}?>
           </div></div>
+		  <?php if ($mov_id != 0){echo '<input type="hidden" id="id_mov" name="id_mov" value="'.$mov_id.'">';}?>
           <div class="form-group">
 		    <label for="file"><?php echo $lang['75'];?> <a href="#" class="tooltip-large" title="<?php echo $lang['77'];?>"><span class="glyphicon glyphicon-info-sign"></span></a></label>
 			<input type="file" name="file" class="filestyle" data-buttonBefore="true" data-buttonText="<?php echo $lang['76'];?>">

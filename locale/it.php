@@ -13,7 +13,7 @@ $lang = array(
 				'08' => 'Impostazioni',
 				'09' => 'Esci',
 				//dashboard.php
-				'10' => 'Anno di analisi',
+				'10' => 'Filtri',
 				'11' => 'Entrata',
 				'12' => 'Uscita',
 				'13' => 'Importi per tipologia',

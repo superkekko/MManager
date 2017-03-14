@@ -55,7 +55,7 @@ $(document).ready(function() {
 			<th><?php echo $lang['24'];?></th>
 			<th><?php echo $lang['17'];?></th>
 			<th><?php echo $lang['25'];?></th>
-			<th><?php echo $lang['41'];?></th>
+			<th><?php echo $lang['41'];?> | <?php echo $lang['58'];?></th>
         </tr>
     </thead>
     <tbody>
@@ -66,7 +66,7 @@ $(document).ready(function() {
 	   <td data-order="'.date('Ymd',strtotime($row_mov['dat_mov'])).'">'.date('d/m/Y',strtotime($row_mov['dat_mov'])).'</td>
 	   <td>'.$row_mov['usr_mov'].'</td>
 	   <td>'.$row_mov['note'].'</td>
-	   <td><a href="?mov_id='.$row_mov['mov_id'].'">Cancella</a></td>
+	   <td><a href="?mov_id='.$row_mov['mov_id'].'">'.$lang['41'].'</a> | <a href="add.php?mod_mov_id=' . $row_mov['mov_id'] . '">'.$lang['58'].'</a></td>
 	  </tr>';
      }?>
 	</tbody>

@@ -13,7 +13,7 @@ $lang = array(
 				'08' => 'Settings',
 				'09' => 'Logout',
 				//dashboard.php
-				'10' => 'Dashboard year',
+				'10' => 'Filters',
 				'11' => 'Income',
 				'12' => 'Expense',
 				'13' => 'Income/Expenses',

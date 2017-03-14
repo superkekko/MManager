@@ -1,6 +1,6 @@
 <?php
 
-$web_ver = '1.5';
+$web_ver = '1.6';
 
 $error     = "";
 $error_cat = "";

@@ -19,7 +19,7 @@ $year      = date('Y');
             <span class="icon-bar"></span>
         </button>
         <?php
-echo '<a href="dashboard.php?year=' . $year . '" class="navbar-brand">MManager</a>';
+echo '<a href="dashboard.php" class="navbar-brand">MManager</a>';
 ?>
    </div>
     <!-- Collection of nav links and other content for toggling -->
@@ -30,9 +30,7 @@ if ($page_name == 'dashboard.php') {
     echo 'class="active"';
 }
 ;
-?>><a href="dashboard.php?year=<?php
-echo date('Y');
-?>"><?php echo $lang['05'];?></a></li>
+?>><a href="dashboard.php"><?php echo $lang['05'];?></a></li>
             <li <?php
 if ($page_name == 'add.php') {
     echo 'class="active"';
