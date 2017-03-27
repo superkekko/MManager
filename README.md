@@ -32,3 +32,5 @@ Un semplice gestore delle spese famigliari - A simple personal finance manager
 - https://developers.google.com/chart/
 - https://datatables.net/
 - http://jscolor.com/
+- http://keen.github.io/dashboards/
+- https://github.com/mistic100/RandomColor.php
