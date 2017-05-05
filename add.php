@@ -31,8 +31,14 @@ include('./locale/'.$_SESSION['lang'].'.php');
 
 $error = "";
 
-$sql_cat    = "select * from category order by parent_id, cat_id";
+$sql_cat    = "select * from category where parent_id = cat_id order by cat_name";
 $result_cat = mysqli_query($db, $sql_cat);
+
+function getParentCat($db, $cat) {
+	$sql_parent_cat    = "select * from category where parent_id = $cat and parent_id <> cat_id order by cat_name";
+    $result_parent_cat = mysqli_query($db, $sql_parent_cat);
+    return $result_parent_cat;
+}
 
 if (!isset($user)) {
     $user = $_SESSION['login_user'];
@@ -178,10 +184,12 @@ if(is_uploaded_file($_FILES['file']['tmp_name']))
 			<option value=" "> </option>
 			<?php
 while ($row_cat = mysqli_fetch_array($result_cat, MYSQLI_ASSOC)) {
-    if ($row_cat['cat_id'] == $row_cat['parent_id'] & $row_cat['cat_id'] != $cat_mov) {
-        echo '<option value="' . $row_cat['cat_id'] . '">' . $row_cat['cat_name'] . '</option>';
-    } elseif ($row_cat['cat_id'] != $cat_mov) {
-        echo '<option value="' . $row_cat['cat_id'] . '"> - ' . $row_cat['cat_name'] . '</option>';
+    echo '<option value="' . $row_cat['cat_id'] . '">' . $row_cat['cat_name'] . '</option>';
+    if (getParentCat($db, $row_cat['cat_id'])) {
+		$parent_cat = getParentCat($db, $row_cat['cat_id']);
+		while ($row_parent_cat = mysqli_fetch_array($parent_cat, MYSQLI_ASSOC)) {
+        echo '<option value="' . $row_parent_cat['cat_id'] . '"> - ' . $row_parent_cat['cat_name'] . '</option>';
+		}
     }
 }
 ?>
@@ -206,8 +214,11 @@ while ($row_cat = mysqli_fetch_array($result_cat, MYSQLI_ASSOC)) {
 			<div class="input-group">
             <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
 			<select name="user" type="user"  id="user" class="form-control">
-			<?php if ($mov_id != 0){echo '<option value="'.$usr_mov.'">'.$usr_mov.'</option>';}?>;
-			<?php if ($user != $usr_mov){
+			<?php if ($mov_id != 0){echo '<option value="'.$usr_mov.'">'.$usr_mov.'</option>';}?>
+			<?php if ($mov_id != 0 and $user != $usr_mov){
+			echo '<option value="'.$user.'">'.$user.'</option>';
+			}?>
+			<?php if ($mov_id == 0){
 			echo '<option value="'.$user.'">'.$user.'</option>';
 			}?>
 			<?php
