@@ -213,10 +213,10 @@ echo 'colors: ['.substr($color,0,strlen($color)-1).']';
  var data = google.visualization.arrayToDataTable([
       ['<?php echo $lang['20'];?>', '<?php echo $lang['11'];?>', '<?php echo $lang['12'];?>'],
  <?php
-$sql_aa   = "SET sql_mode = ''";
-$result_aa = mysqli_query($db, $sql_aa);
+$sql_prep   = "SET sql_mode = ''";
+$result_prep = mysqli_query($db, $sql_prep);
 
-$sql_det_month    = "select concat(month(t.dat_mov), '/', year(t.dat_mov)) as time, case when t.type = 'P' then abs(sum(t.val)) else 0 end as val_pos, case when t.type = 'N' then abs(sum(t.val)) else 0 end as val_neg from total t where t.dat_mov between '$dat_ini' and '$dat_fin' and t.usr_mov like '$user' and t.cat_id like '$categ' and type like '$type' group by concat(month(t.dat_mov), '/', year(t.dat_mov)) order by year(t.dat_mov), month(t.dat_mov)";
+$sql_det_month    = "select concat(month(t.dat_mov), '/', year(t.dat_mov)) as time, (select ifnull(abs(sum(tt.val)),0) from total tt where tt.type = 'P' and month(tt.dat_mov) = month(t.dat_mov) and year(tt.dat_mov) = year(t.dat_mov)) as val_pos, (select ifnull(abs(sum(tt.val)),0) from total tt where tt.type = 'N' and month(tt.dat_mov) = month(t.dat_mov) and year(tt.dat_mov) = year(t.dat_mov)) as val_neg from total t where t.dat_mov between '$dat_ini' and '$dat_fin' and t.usr_mov like '$user' and t.cat_id like '$categ' and type like '$type' group by concat(month(t.dat_mov), '/', year(t.dat_mov)) order by year(t.dat_mov), month(t.dat_mov)";
 $result_det_month = mysqli_query($db, $sql_det_month);
 while ($row = mysqli_fetch_array($result_det_month)) {
     echo "['" . $row['time'] . "'," . $row['val_pos'] . "," . $row['val_neg'] . "],";
