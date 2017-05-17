@@ -20,6 +20,14 @@
 <script>
 $(document).ready(function() {
     $('#tra_table').DataTable({
+    "columns": [
+      { "width": "15%" },
+      { "width": "5%" },
+      { "width": "10%" },
+      { "width": "10%" },
+      { "width": "40%" },
+      { "width": "30%" },
+    ],
 	"order": [ 2, 'desc' ],
 	"language": {
             "lengthMenu": "<?php echo $lang['26'];?>",
