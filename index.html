@@ -1,0 +1,630 @@
+<?php
+include('session.php');
+
+//localization
+include('./locale/'.$_SESSION['lang'].'.php');
+setlocale(LC_ALL, 'ita');
+
+//variables
+$cur_yea = strftime("%Y");
+$cur_month = strftime("%m");
+$cur_user = $_SESSION['login_user'];
+//get previous 6 months
+for ($i = 5; $i >= 0; $i--) {
+  $months[] = date("Y-n", strtotime( date( 'Y-n-01' )." -$i months"));
+  $months_desc[] = ucwords(strftime('%B - %Y', strtotime(date("Y-m", strtotime( date( 'Y-m-01' )." -$i months")))));
+}
+$color = array("text-primary","text-success","text-info","text-warning","text-danger");
+
+// get year balance
+$sql_query = "select sum(val) as value from movement where year(dat_mov)=$cur_yea";
+$sql_exec = mysqli_query($db, $sql_query);
+$sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+$balance_year_no_format = $sql_row['value'];
+$balance_year = number_format($sql_row['value'], 2, ',', '.');
+
+// get month balance
+$sql_query = "select sum(val) as value from movement where year(dat_mov)=$cur_yea and month(dat_mov)=$cur_month";
+$sql_exec = mysqli_query($db, $sql_query);
+$sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+$balance_month_no_format = $sql_row['value'];
+$balance_month = number_format($sql_row['value'], 2, ',', '.');
+
+// get month income
+$sql_query = "select sum(val) as value from movement where year(dat_mov)=$cur_yea and month(dat_mov)=$cur_month and type='P'";
+$sql_exec = mysqli_query($db, $sql_query);
+$sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+$income_month = number_format($sql_row['value'], 2, ',', '.');
+
+// get month expenses
+$sql_query = "select sum(val) as value from movement where year(dat_mov)=$cur_yea and month(dat_mov)=$cur_month and type='N'";
+$sql_exec = mysqli_query($db, $sql_query);
+$sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+$expenses_month = number_format($sql_row['value'], 2, ',', '.');
+
+// get detail for bar graph
+foreach ($months as $month_val) {
+  $sql_query = "select ifnull(abs(sum(val)), 0) as value from movement where concat(year(dat_mov),'-',month(dat_mov))='$month_val' and type='P'";
+  $sql_exec = mysqli_query($db, $sql_query);
+  $sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+  $val_pos[] = $sql_row['value'];
+}
+
+foreach ($months as $month_val) {
+  $sql_query = "select ifnull(abs(sum(val)), 0) as value from movement where concat(year(dat_mov),'-',month(dat_mov))='$month_val' and type='N'";
+  $sql_exec = mysqli_query($db, $sql_query);
+  $sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+  $val_neg[] = $sql_row['value'];
+}
+
+// get detail for pie graph
+$sql_query = "select round(sum(val)/(select sum(val) from movement where year(dat_mov)=$cur_yea and month(dat_mov)=$cur_month)*100,0) as value from movement where year(dat_mov)=$cur_yea and month(dat_mov)=$cur_month group by usr_mov order by usr_mov";
+$sql_exec = mysqli_query($db, $sql_query);
+$data_val = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+
+$sql_query = "select usr_mov from movement where year(dat_mov)=$cur_yea and month(dat_mov)=$cur_month group by usr_mov order by usr_mov";
+$sql_exec = mysqli_query($db, $sql_query);
+$data_usr = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+$data_usr = array_map('ucfirst', $data_usr);
+
+//--------------------------------------------------------------
+
+if (isset($_POST['user'])) {
+    $user = $_POST['user'];}
+else {$user = '%';}
+
+$sql_user    = "select usr_id from user where valid = 'S' order by usr_id";
+$result_user = mysqli_query($db, $sql_user);
+
+if (isset($_POST['dat_ini'])) {
+    $dat_ini = $_POST['dat_ini'];}
+else {$dat_ini = date("Y").'-01-01';}
+
+if (isset($_POST['dat_fin'])) {
+    $dat_fin = $_POST['dat_fin'];}
+else {$dat_fin = date("Y").'-12-31';}
+
+if (isset($_POST['categ'])) {
+    $categ = $_POST['categ'];}
+else {$categ = '%';}
+
+$sql_cat    = "select * from category where parent_id = cat_id order by cat_name";
+$result_cat = mysqli_query($db, $sql_cat);
+
+function getParentCat($db, $cat) {
+	$sql_parent_cat    = "select * from category where parent_id = $cat and parent_id <> cat_id order by cat_name";
+    $result_parent_cat = mysqli_query($db, $sql_parent_cat);
+    return $result_parent_cat;
+}
+
+function getCatName($db, $cat_id) {
+	$sql_name_cat    = "select * from category where cat_id = $cat_id";
+    $result_name_cat = mysqli_query($db, $sql_name_cat);
+	while ($row_cat = mysqli_fetch_array($result_name_cat, MYSQLI_ASSOC)) {
+	$cat_name_res = $row_cat['cat_name'];
+	}
+    return $cat_name_res;
+}
+
+if (isset($_POST['type'])) {
+    $type = $_POST['type'];}
+else {$type = '%';}
+
+$income = $lang['11'];
+$outcome = $lang['12'];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>MManager - Dashboard</title>
+
+  <!-- favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="icon/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="icon/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="icon/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="icon/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="icon/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icon/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="icon/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icon/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="icon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icon/favicon-16x16.png">
+  <link rel="manifest" href="icon/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="icon/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Custom fonts for this template-->
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="css/sb-admin-2.min.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+        <div class="sidebar-brand-icon">
+          <img src="logo.svg" height="40px">
+        </div>
+        <div class="sidebar-brand-text mx-3">MManager</div>
+      </a>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider my-0">
+
+      <!-- Nav Item - Dashboard -->
+      <li class="nav-item active">
+        <a class="nav-link" href="index.html">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Dashboard</span></a>
+      </li>
+
+      <!-- Nav Item - Charts -->
+      <li class="nav-item">
+        <a class="nav-link" href="charts.html">
+          <i class="fas fa-fw fa-table"></i>
+          <span>Dettagli</span></a>
+      </li>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Heading -->
+      <div class="sidebar-heading">
+        Impostazioni
+      </div>
+
+      <!-- Nav Item - Tables -->
+      <li class="nav-item">
+        <a class="nav-link" href="tables.html">
+          <i class="fas fa-fw fa-wrench"></i>
+          <span>Cambio password</span></a>
+      </li>
+
+      <!-- Nav Item - Tables -->
+      <li class="nav-item">
+        <a class="nav-link" href="tables.html">
+          <i class="fas fa-fw fa-cog"></i>
+          <span>Admin</span></a>
+      </li>
+
+      <!-- Nav Item - Tables -->
+      <li class="nav-item">
+        <a class="nav-link" href="tables.html">
+          <i class="fas fa-fw fa-sign-out-alt"></i>
+          <span>Logout</span></a>
+      </li>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider d-none d-md-block">
+
+      <!-- Sidebar Toggler (Sidebar) -->
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
+
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+          </div>
+
+          <!-- Content Row -->
+          <div class="row">
+
+            <!-- total_month_card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+            <?php
+            if($balance_month_no_format >=  1000) {
+              echo '<div class="card border-left-success shadow h-100 py-2">';
+            } elseif ($balance_month_no_format < 1000 && $balance_month_no_format > 0 ) {
+              echo '<div class="card border-left-warning shadow h-100 py-2">';
+            }else {
+              echo '<div class="card border-left-danger shadow h-100 py-2">';
+            };
+            ?>
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <?php
+                      if($balance_month_no_format >=  1000) {
+                        echo '<div class="text-xs font-weight-bold text-success text-uppercase mb-1">';
+                      } elseif ($balance_month_no_format < 1000 && $balance_month_no_format > 0 ) {
+                        echo '<div class="text-xs font-weight-bold text-warning text-uppercase mb-1">';
+                      }else {
+                        echo '<div class="text-xs font-weight-bold text-danger text-uppercase mb-1">';
+                      };
+                      ?>
+                      Totale (mese corrente)</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">€<?php echo $balance_month ?></div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- total_year_card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+              <?php
+              if($balance_year_no_format >=  1000) {
+                echo '<div class="card border-left-success shadow h-100 py-2">';
+              } elseif ($balance_year_no_format < 1000 && $balance_year_no_format > 0 ) {
+                echo '<div class="card border-left-warning shadow h-100 py-2">';
+              }else {
+                echo '<div class="card border-left-danger shadow h-100 py-2">';
+              };
+              ?>
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <?php
+                      if($balance_year_no_format >=  1000) {
+                        echo '<div class="text-xs font-weight-bold text-success text-uppercase mb-1">';
+                      } elseif ($balance_year_no_format < 1000 && $balance_year_no_format > 0 ) {
+                        echo '<div class="text-xs font-weight-bold text-waring text-uppercase mb-1">';
+                      }else {
+                        echo '<div class="text-xs font-weight-bold text-danger text-uppercase mb-1">';
+                      };
+                      ?>
+                    Totale (annuale)</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">€<?php echo $balance_year ?></div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- income_month_card-->
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Ricavi (mese corrente)</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">€<?php echo $income_month ?></div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- expenses_month_card -->
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Spese (mese corrente)</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">€<?php echo $expenses_month ?></div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Row -->
+          <div class="row">
+
+            <!-- Area Chart -->
+            <div class="col-xl-8 col-lg-7">
+              <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                  <h6 class="m-0 font-weight-bold text-primary">Grafico entrate/uscite</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                  <div class="chart-area">
+                    <canvas id="myBarChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie Chart -->
+            <div class="col-xl-4 col-lg-5">
+              <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                  <h6 class="m-0 font-weight-bold text-primary">Percentuale per utente (mese corrente)</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                  <div class="chart-pie pt-4 pb-2">
+                    <canvas id="myPieChart"></canvas>
+                  </div>
+                  <div class="mt-4 text-center small">
+                    <span class="mr-2">
+                      <i class="fas fa-circle text-primary"></i> Direct
+                    </span>
+                    <span class="mr-2">
+                      <i class="fas fa-circle text-success"></i> Social
+                    </span>
+                    <span class="mr-2">
+                      <i class="fas fa-circle text-info"></i> Referral
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Row -->
+          <div class="row">
+
+            <!-- Content Column -->
+            <div class="col-lg-12 mb-12">
+              <!-- Project Card Example -->
+              <div class="card shadow mb-12">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Importi per categoria</h6>
+                </div>
+                <div class="card-body">
+                  <h4 class="small font-weight-bold">Server Migration <span class="float-right">20%</span></h4>
+                  <div class="progress mb-4">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <h4 class="small font-weight-bold">Sales Tracking <span class="float-right">40%</span></h4>
+                  <div class="progress mb-4">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <h4 class="small font-weight-bold">Customer Database <span class="float-right">60%</span></h4>
+                  <div class="progress mb-4">
+                    <div class="progress-bar" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <h4 class="small font-weight-bold">Payout Details <span class="float-right">80%</span></h4>
+                  <div class="progress mb-4">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <h4 class="small font-weight-bold">Account Setup <span class="float-right">Complete!</span></h4>
+                  <div class="progress">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright &copy; MManager 2020</span>
+          </div>
+        </div>
+      </footer>
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin-2.min.js"></script>
+
+  <!-- Page level plugins -->
+  <script src="vendor/chart.js/Chart.min.js"></script>
+
+  <!-- Bar chart JS -->
+  <script>
+    // Set new default font family and font color to mimic Bootstrap's default styling
+    Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+    Chart.defaults.global.defaultFontColor = '#858796';
+
+    function number_format(number, decimals, dec_point, thousands_sep) {
+      // *     example: number_format(1234.56, 2, ',', ' ');
+      // *     return: '1 234,56'
+      number = (number + '').replace(',', '').replace(' ', '');
+      var n = !isFinite(+number) ? 0 : +number,
+        prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+        sep = (typeof thousands_sep === 'undefined') ? '.' : thousands_sep,
+        dec = (typeof dec_point === 'undefined') ? ',' : dec_point,
+        s = '',
+        toFixedFix = function(n, prec) {
+          var k = Math.pow(10, prec);
+          return '' + Math.round(n * k) / k;
+        };
+      // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+      s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+      if (s[0].length > 3) {
+        s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+      }
+      if ((s[1] || '').length < prec) {
+        s[1] = s[1] || '';
+        s[1] += new Array(prec - s[1].length + 1).join('0');
+      }
+      return s.join(dec);
+    }
+
+    // Bar Chart Example
+    var ctx = document.getElementById("myBarChart");
+    var myBarChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [<?php echo '"'.implode('","', $months_desc).'"'; ?>],
+        datasets: [{
+          label: "Entrate",
+          backgroundColor: "#1cc88a",
+          hoverBackgroundColor: "#1cc88a",
+          borderColor: "#1cc88a",
+          data: [<?php echo implode(',', $val_pos); ?>],
+        },
+        {
+          label: "Uscite",
+          backgroundColor: "#e74a3b",
+          hoverBackgroundColor: "#e74a3b",
+          borderColor: "#e74a3b",
+          data: [<?php echo implode(',', $val_neg); ?>],
+        }],
+      },
+      options: {
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            left: 10,
+            right: 25,
+            top: 25,
+            bottom: 0
+          }
+        },
+        scales: {
+          xAxes: [{
+            time: {
+              unit: 'month'
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false
+            },
+            ticks: {
+              maxTicksLimit: 6
+            },
+            maxBarThickness: 25,
+          }],
+          yAxes: [{
+            ticks: {
+              min: 0,
+            //max: 15000,
+              maxTicksLimit: 5,
+              padding: 10,
+              // Include a dollar sign in the ticks
+              callback: function(value, index, values) {
+                return '€' + number_format(value);
+              }
+            },
+            gridLines: {
+              color: "rgb(234, 236, 244)",
+              zeroLineColor: "rgb(234, 236, 244)",
+              drawBorder: false,
+              borderDash: [2],
+              zeroLineBorderDash: [2]
+            }
+          }],
+        },
+        legend: {
+          display: false
+        },
+        tooltips: {
+          titleMarginBottom: 10,
+          titleFontColor: '#6e707e',
+          titleFontSize: 14,
+          backgroundColor: "rgb(255,255,255)",
+          bodyFontColor: "#858796",
+          borderColor: '#dddfeb',
+          borderWidth: 1,
+          xPadding: 15,
+          yPadding: 15,
+          displayColors: false,
+          caretPadding: 10,
+          callbacks: {
+            label: function(tooltipItem, chart) {
+              var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+              return datasetLabel + ': €' + number_format(tooltipItem.yLabel);
+            }
+          }
+        },
+      }
+    });
+
+
+    // Pie Chart Example
+    var ctx = document.getElementById("myPieChart");
+    var myPieChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: [<?php echo '"'.implode('"",""', $data_usr).'"'; ?>],
+        datasets: [{
+          data: [<?php echo implode(',', $data_val); ?>],
+          backgroundColor: ['#4e73df'],
+          hoverBackgroundColor: ['#2e59d9'],
+          hoverBorderColor: "rgba(234, 236, 244, 1)",
+        }],
+      },
+      options: {
+        maintainAspectRatio: false,
+        tooltips: {
+          backgroundColor: "rgb(255,255,255)",
+          bodyFontColor: "#858796",
+          borderColor: '#dddfeb',
+          borderWidth: 1,
+          xPadding: 15,
+          yPadding: 15,
+          displayColors: false,
+          caretPadding: 10,
+        },
+        legend: {
+          display: false
+        },
+        cutoutPercentage: 80,
+      },
+    });
+
+  </script>
+
+</body>
+
+</html>

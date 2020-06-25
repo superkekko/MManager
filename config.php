@@ -1,7 +1,7 @@
 <?php
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'mmanager');
-define('DB_PASSWORD', 'mm4n4g3r');
+define('DB_PASSWORD', 'mmanager');
 define('DB_DATABASE', 'mmanager');
 $db = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
 
