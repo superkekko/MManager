@@ -1,0 +1,301 @@
+<?php include('header.html');
+
+include('session.php');
+
+include('action_admin.php');
+
+//localization
+include('../locale/'.$_SESSION['lang'].'.php');
+setlocale(LC_ALL, 'ita');
+
+//variables
+$cur_yea = strftime("%Y");
+$cur_month = strftime("%m");
+$cur_user = $_SESSION['login_user'];
+//get previous 6 months
+for ($i = 5; $i >= 0; $i--) {
+  $months[] = date("Y-n", strtotime( date( 'Y-n-01' )." -$i months"));
+  $months_desc[] = ucwords(strftime('%B - %Y', strtotime(date("Y-m", strtotime( date( 'Y-m-01' )." -$i months")))));
+}
+$color = array("text-primary","text-success","text-info","text-warning","text-danger");
+
+// get detail
+$sql_query = "select mov_id, cat_name, val, dat_mov, usr_mov, note from mov";
+$sql_exec = mysqli_query($db, $sql_query);
+$val_det = array();
+while($sql_row = mysqli_fetch_assoc($sql_exec)) {
+    $val_det[]=$sql_row;
+  };
+
+$sql_query = "SELECT GROUP_CONCAT(CONCAT('\"',cat_name,'\"')) as category FROM cat";
+$sql_exec = mysqli_query($db, $sql_query);
+$sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+$category = $sql_row['category'];
+
+$sql_query = "SELECT GROUP_CONCAT(CONCAT('\"',usr_id,'\"')) as user FROM user";
+$sql_exec = mysqli_query($db, $sql_query);
+$sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
+$user = $sql_row['user'];
+?>
+
+<!-- Content Wrapper -->
+<div id="content-wrapper" class="d-flex flex-column">
+
+  <!-- Main Content -->
+  <div id="content">
+
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+
+      <!-- Page Heading -->
+      <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Impostazioni | Admin</h1>
+      </div>
+          <!-- Content Row -->
+          <div class="row">
+
+            <!-- Content Column -->
+            <div class="col-lg-12 mb-12">
+              <!-- Project Card Example -->
+              <div class="card shadow mb-12">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Gestione utenti</h6>
+                  <p style="text-align:right">
+                    <a href="#" onclick="users.insertRow(1,0,true)" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Add row</a>
+                    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='save'><i class="fas fa-save fa-sm text-white-50"></i> Save row(s)</a>
+                    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='remove'><i class="fas fa-minus fa-sm text-white-50"></i> Delete selected row(s)</a>
+                  </p>
+                </div>
+                <div class="card-body" id="table">
+                  <div id="users_table"></div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+        <br><br>
+        <!-- Content Row -->
+        <div class="row">
+          <!-- Content Column -->
+          <div class="col-lg-12 mb-12">
+            <!-- Project Card Example -->
+            <div class="card shadow mb-12">
+              <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Gestione categorie</h6>
+              </div>
+              <div class="card-body">
+                <div id="categ"></div>
+              </div>
+            </div>
+          </div>
+      </div>
+      <!-- /.container-fluid -->
+
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <script src="movements/jsuites.js"></script>
+      <script src="movements/jexcel.js"></script>
+      <script src="movements/accounting.js"></script>
+
+      <script>
+
+      var myRequest = null;
+
+      function CreateXmlHttpReq(handler) {
+        var xmlhttp = null;
+        xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = handler;
+        return xmlhttp;
+      }
+
+      function myHandler() {
+          if (myRequest.readyState == 4 && myRequest.status == 200) {
+              console.log(myRequest.responseText);
+              users.refresh();
+          }
+      }
+
+        var delDbRows = [];
+        var delFeRows = [];
+        var addFeRows = [];
+        var addDbRows = [];
+        var add = 0;
+        var lastAction = true;
+        var lastActionSave = false;
+        var insertStart = false;
+
+        document.getElementById('remove').onclick = function () {
+          var first = true;
+          delFeRows.forEach(function (item) {
+            if (first){
+              users.deleteRow(item);
+              first = false;
+            }else{
+              users.deleteRow(item-1);
+            }
+            if (delDbRows !== " "){
+              console.log(delDbRows);
+              myRequest = CreateXmlHttpReq(myHandler);
+              myRequest.open("POST","action_admin.php");
+              myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+              myRequest.send("pk="+delDbRows+"&action=delete");
+            }
+            users.getJson();
+          })
+        }
+
+        document.getElementById('save').onclick = function () {
+          addFeRows.forEach(function (item) {
+            var row = 'A'.concat(item+1);
+            users.setStyle(row, 'background-color', 'white');
+            var row = 'B'.concat(item+1);
+            users.setStyle(row, 'background-color', 'white');
+            var row = 'C'.concat(item+1);
+            users.setStyle(row, 'background-color', 'white');
+            var row = 'D'.concat(item+1);
+            users.setStyle(row, 'background-color', 'white');
+            var row = 'E'.concat(item+1);
+            users.setStyle(row, 'background-color', 'white');
+            var row = 'F'.concat(item+1);
+            users.setStyle(row, 'background-color', 'white');
+            addDbRows[item] = users.getRowData(item);
+            //console.log('A'.concat(item+1));
+          })
+          console.log(addDbRows);
+          var cat = addDbRows[0][1];
+          var curr = acounting.unformat(addDbRows[0][2], ",");
+          var date = addDbRows[0][3];
+          var usr = addDbRows[0][4];
+          var note = addDbRows[0][5];
+          myRequest = CreateXmlHttpReq(myHandler);
+          myRequest.open("POST","action_admin.php");
+          myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+          myRequest.send("cat="+cat+"&value="+curr+"&date="+date+"&usr="+usr+"&note="+note+"&action=save");
+          addFeRows = [];
+          add = 0;
+          lastActionSave = true;
+          lastAction = true;
+          insertStart = false;
+        }
+
+        var divDimension = document.getElementById('users_table').offsetWidth;
+        //sidebar aperta
+        console.log(divDimension);
+        divDimension = divDimension - 120
+        var emailDimension = divDimension - 900;
+
+        var users = jexcel(document.getElementById('users_table'), {
+            url:'results_user.json',
+            search:true,
+            //pagination:true,
+            //pagination:50,
+            tableOverflow:true,
+            lazyLoading:true,
+            loadingSpin:true,
+            tableWidth: divDimension,
+            tableHeight: '700px',
+            defaultColWidth: 150,
+            contextMenu: false,
+            //filters:true,
+            includeHeadersOnDownload:true,
+            csvFileName:'movements',
+            columns: [
+                {
+                    type: 'text',
+                    title:'login',
+                    width:150
+                },
+                {
+                    type: 'text',
+                    title:'email',
+                    width: emailDimension
+                },
+                {
+                    type: 'text',
+                    title:'password',
+                    width: 150
+                },
+                {
+                    type: 'calendar',
+                    title:'last_login',
+                    readOnly:true,
+                    width:150
+                },
+                {
+                    type: 'checkbox',
+                    title:'admin',
+                    width:150
+                },
+                {
+                    type: 'checkbox',
+                    title:'valid',
+                    width:150
+                },
+                {
+                    type: 'color',
+                    title:'color',
+                    render:'square',
+                    width:150
+                },
+             ],
+          onchange: function(el,cell,colNumber,rowNumber,value,old_value) {
+            lastActionSave = false;
+            var row_data = users.getRowData(rowNumber);
+            var row_pk = row_data[0];
+            if(colNumber == 2){
+              var val=accounting.unformat(value, ",");
+            }else{
+              var val = value;
+            }
+            if (row_pk !== ""){
+              console.log(row_pk,colNumber,value);
+            }
+            if (!insertStart){
+              myRequest = CreateXmlHttpReq(myHandler);
+              myRequest.open("POST","action_admin.php");
+              myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+              myRequest.send("pk="+row_pk+"&col="+colNumber+"&value="+val+"&action=edit");
+              lastAction = true;
+            }
+          },
+          onselection: function(instance,colNumber1,rowNumber1,colNumber2,rowNumber2) {
+            delDbRows = [];
+            delFeRows = [];
+            for(let i=rowNumber1;i<=rowNumber2;i++)
+            {
+                var row_data = users.getRowData(i);
+                var row_pk = row_data[0];
+                delDbRows.push(row_pk);
+                delFeRows.push(i);
+            }
+            //console.log(rowNumber1, rowNumber2, delDbRows, delFeRows);
+          },
+          onundo: function(el,value) {
+            console.log(value);
+            if(undo.action == 'deleteRow'){
+              console.log(value.action, value.rowData[0]);
+            }else if (value.action == 'setValue'){
+              console.log(value.action, undo.records[0].col, value.records[0].row, value.records[0].oldValue);
+            }
+          },
+          oninsertrow: function(el, rowNumber, numOfRows, rowRecords, insertBefore) {
+            lastActionSave = false;
+            addFeRows.push(add);
+            users.setStyle({ A1:'background-color: #eee;', B1:'background-color: #eee;', C1:'background-color: #eee;', D1:'background-color: #eee;', E1:'background-color: #eee;', F1:'background-color: #eee;' });
+            add++;
+            lastAction = true;
+            insertStart = true;
+            //console.log(addFeRows);
+          }
+        });
+      </script>
+
+<?php include('footer.html'); ?>
+
+</body>
+
+</html>

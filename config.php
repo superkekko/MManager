@@ -1,8 +1,18 @@
 <?php
-define('DB_SERVER', 'localhost');
-define('DB_USERNAME', 'mmanager');
-define('DB_PASSWORD', 'mmanager');
-define('DB_DATABASE', 'mmanager');
+
+if (!defined('DB_SERVER')){
+  define('DB_SERVER', 'localhost');
+}
+if (!defined('DB_USERNAME')){
+  define('DB_USERNAME', 'mmanager');
+}
+if (!defined('DB_PASSWORD')){
+  define('DB_PASSWORD', 'mmanager');
+}
+if (!defined('DB_DATABASE')){
+  define('DB_DATABASE', 'mmanager');
+}
+
 $db = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
 
 /* check connection */

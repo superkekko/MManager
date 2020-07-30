@@ -27,7 +27,7 @@ $sql_cat    = "select * from category where parent_id = cat_id order by cat_name
 $result_cat = mysqli_query($db, $sql_cat);
 
 function getParentCat($db, $cat) {
-	$sql_parent_cat    = "select * from category where parent_id = $cat and parent_id <> cat_id order by cat_name";
+	  $sql_parent_cat    = "select * from category where parent_id = $cat and parent_id <> cat_id order by cat_name";
     $result_parent_cat = mysqli_query($db, $sql_parent_cat);
     return $result_parent_cat;
 }
