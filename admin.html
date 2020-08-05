@@ -4,6 +4,8 @@ include('session.php');
 
 include('action_admin.php');
 
+include('action_categ.php');
+
 //localization
 include('../locale/'.$_SESSION['lang'].'.php');
 setlocale(LC_ALL, 'ita');
@@ -62,8 +64,8 @@ $user = $sql_row['user'];
                   <h6 class="m-0 font-weight-bold text-primary">Gestione utenti</h6>
                   <p style="text-align:right">
                     <a href="#" onclick="users.insertRow(1,0,true)" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Add row</a>
-                    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='save'><i class="fas fa-save fa-sm text-white-50"></i> Save row(s)</a>
-                    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='remove'><i class="fas fa-minus fa-sm text-white-50"></i> Delete selected row(s)</a>
+                    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='user_save'><i class="fas fa-save fa-sm text-white-50"></i> Save row(s)</a>
+                    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='user_remove'><i class="fas fa-minus fa-sm text-white-50"></i> Delete selected row(s)</a>
                   </p>
                 </div>
                 <div class="card-body" id="table">
@@ -82,9 +84,14 @@ $user = $sql_row['user'];
             <div class="card shadow mb-12">
               <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Gestione categorie</h6>
+                <p style="text-align:right">
+                  <a href="#" onclick="categ.insertRow(1,0,true)" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Add row</a>
+                  <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='categ_save'><i class="fas fa-save fa-sm text-white-50"></i> Save row(s)</a>
+                  <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='categ_remove'><i class="fas fa-minus fa-sm text-white-50"></i> Delete selected row(s)</a>
+                </p>
               </div>
               <div class="card-body">
-                <div id="categ"></div>
+                <div id="categ_table"></div>
               </div>
             </div>
           </div>
@@ -114,7 +121,12 @@ $user = $sql_row['user'];
 
       function myHandler() {
           if (myRequest.readyState == 4 && myRequest.status == 200) {
-              console.log(myRequest.responseText);
+            console.log(myRequest.responseText);
+            var resp = myRequest.responseText;
+            var iniResp = resp.substring(0, 3);
+             if (iniResp == 'ERR'){
+               alert(resp);
+             }
               users.refresh();
           }
       }
@@ -128,7 +140,7 @@ $user = $sql_row['user'];
         var lastActionSave = false;
         var insertStart = false;
 
-        document.getElementById('remove').onclick = function () {
+        document.getElementById('user_remove').onclick = function () {
           var first = true;
           delFeRows.forEach(function (item) {
             if (first){
@@ -148,7 +160,7 @@ $user = $sql_row['user'];
           })
         }
 
-        document.getElementById('save').onclick = function () {
+        document.getElementById('user_save').onclick = function () {
           addFeRows.forEach(function (item) {
             var row = 'A'.concat(item+1);
             users.setStyle(row, 'background-color', 'white');
@@ -166,15 +178,16 @@ $user = $sql_row['user'];
             //console.log('A'.concat(item+1));
           })
           console.log(addDbRows);
-          var cat = addDbRows[0][1];
-          var curr = acounting.unformat(addDbRows[0][2], ",");
-          var date = addDbRows[0][3];
-          var usr = addDbRows[0][4];
-          var note = addDbRows[0][5];
+          var usrId = addDbRows[0][0];
+          var email = addDbRows[0][1];
+          var password = addDbRows[0][2];
+          var admin = addDbRows[0][4];
+          var valid = addDbRows[0][5];
+          var color = addDbRows[0][6];
           myRequest = CreateXmlHttpReq(myHandler);
           myRequest.open("POST","action_admin.php");
           myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-          myRequest.send("cat="+cat+"&value="+curr+"&date="+date+"&usr="+usr+"&note="+note+"&action=save");
+          myRequest.send("usrid="+usrId+"&email="+email+"&password="+password+"&admin="+admin+"&valid="+valid+"&color="+color+"&action=save");
           addFeRows = [];
           add = 0;
           lastActionSave = true;
@@ -186,16 +199,16 @@ $user = $sql_row['user'];
         //sidebar aperta
         console.log(divDimension);
         divDimension = divDimension - 120
-        var emailDimension = divDimension - 900;
+        var emailDimension = divDimension - 850;
 
         var users = jexcel(document.getElementById('users_table'), {
             url:'results_user.json',
             search:true,
             //pagination:true,
             //pagination:50,
-            tableOverflow:true,
-            lazyLoading:true,
-            loadingSpin:true,
+            //tableOverflow:true,
+            //lazyLoading:true,
+            //loadingSpin:true,
             tableWidth: divDimension,
             tableHeight: '700px',
             defaultColWidth: 150,
@@ -246,19 +259,12 @@ $user = $sql_row['user'];
             lastActionSave = false;
             var row_data = users.getRowData(rowNumber);
             var row_pk = row_data[0];
-            if(colNumber == 2){
-              var val=accounting.unformat(value, ",");
-            }else{
-              var val = value;
-            }
-            if (row_pk !== ""){
-              console.log(row_pk,colNumber,value);
-            }
             if (!insertStart){
+              console.log(row_pk,colNumber,value);
               myRequest = CreateXmlHttpReq(myHandler);
               myRequest.open("POST","action_admin.php");
               myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-              myRequest.send("pk="+row_pk+"&col="+colNumber+"&value="+val+"&action=edit");
+              myRequest.send("pk="+row_pk+"&col="+colNumber+"&value="+value+"&action=edit");
               lastAction = true;
             }
           },
@@ -286,6 +292,167 @@ $user = $sql_row['user'];
             lastActionSave = false;
             addFeRows.push(add);
             users.setStyle({ A1:'background-color: #eee;', B1:'background-color: #eee;', C1:'background-color: #eee;', D1:'background-color: #eee;', E1:'background-color: #eee;', F1:'background-color: #eee;' });
+            add++;
+            lastAction = true;
+            insertStart = true;
+            //console.log(addFeRows);
+          }
+        });
+
+//gestione categorie
+
+        document.getElementById('categ_remove').onclick = function () {
+          var first = true;
+          delFeRows.forEach(function (item) {
+            if (first){
+              categ.deleteRow(item);
+              first = false;
+            }else{
+              categ.deleteRow(item-1);
+            }
+            if (delDbRows !== " "){
+              console.log(delDbRows);
+              myRequest = CreateXmlHttpReq(myHandler);
+              myRequest.open("POST","action_categ.php");
+              myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+              myRequest.send("pk="+delDbRows+"&action=delete");
+            }
+            users.getJson();
+          })
+        }
+
+        document.getElementById('categ_save').onclick = function () {
+          addFeRows.forEach(function (item) {
+            var row = 'A'.concat(item+1);
+            categ.setStyle(row, 'background-color', 'white');
+            var row = 'B'.concat(item+1);
+            categ.setStyle(row, 'background-color', 'white');
+            var row = 'C'.concat(item+1);
+            categ.setStyle(row, 'background-color', 'white');
+            var row = 'D'.concat(item+1);
+            categ.setStyle(row, 'background-color', 'white');
+            var row = 'E'.concat(item+1);
+            categ.setStyle(row, 'background-color', 'white');
+            var row = 'F'.concat(item+1);
+            categ.setStyle(row, 'background-color', 'white');
+            addDbRows[item] = users.getRowData(item);
+            //console.log('A'.concat(item+1));
+          })
+          console.log(addDbRows);
+          var usrId = addDbRows[0][0];
+          var email = addDbRows[0][1];
+          var password = addDbRows[0][2];
+          var admin = addDbRows[0][4];
+          var valid = addDbRows[0][5];
+          var color = addDbRows[0][6];
+          myRequest = CreateXmlHttpReq(myHandler);
+          myRequest.open("POST","action_categ.php");
+          myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+          myRequest.send("usrid="+usrId+"&email="+email+"&password="+password+"&admin="+admin+"&valid="+valid+"&color="+color+"&action=save");
+          addFeRows = [];
+          add = 0;
+          lastActionSave = true;
+          lastAction = true;
+          insertStart = false;
+        }
+
+        var divDimension = document.getElementById('categ_table').offsetWidth;
+        //sidebar aperta
+        console.log(divDimension);
+        divDimension = divDimension - 120
+        var textDimension = divDimension - 500;
+
+        var categ = jexcel(document.getElementById('categ_table'), {
+            url:'results_cat.json',
+            search:true,
+            //pagination:true,
+            //pagination:50,
+            tableOverflow:true,
+            lazyLoading:true,
+            loadingSpin:true,
+            tableWidth: divDimension,
+            tableHeight: '700px',
+            defaultColWidth: 150,
+            contextMenu: false,
+            //filters:true,
+            includeHeadersOnDownload:true,
+            csvFileName:'movements',
+            columns: [
+                {
+                    type: 'hidden',
+                    title:'id',
+                    //width:150
+                },
+                {
+                    type: 'text',
+                    title:'name',
+                    width: 150
+                },
+                {
+                    type: 'text',
+                    title:'parent',
+                    width: 150
+                },
+                {
+                    type: 'checkbox',
+                    title:'income',
+                    width: 100
+                },
+                {
+                    type: 'numeric',
+                    title:'movements',
+                    width: 100
+                },
+                {
+                    type: 'color',
+                    title:'color',
+                    render:'square',
+                    width: 50
+                },
+                {
+                    type: 'text',
+                    title: 'keyword',
+                    align: 'left',
+                    width: textDimension
+                },
+             ],
+          onchange: function(el,cell,colNumber,rowNumber,value,old_value) {
+            lastActionSave = false;
+            var row_data = categ.getRowData(rowNumber);
+            var row_pk = row_data[0];
+            if (!insertStart){
+              console.log(row_pk,colNumber,value);
+              myRequest = CreateXmlHttpReq(myHandler);
+              myRequest.open("POST","action_categ.php");
+              myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+              myRequest.send("pk="+row_pk+"&col="+colNumber+"&value="+value+"&action=edit");
+              lastAction = true;
+            }
+          },
+          onselection: function(instance,colNumber1,rowNumber1,colNumber2,rowNumber2) {
+            delDbRows = [];
+            delFeRows = [];
+            for(let i=rowNumber1;i<=rowNumber2;i++)
+            {
+                var row_data = categ.getRowData(i);
+                var row_pk = row_data[0];
+                delDbRows.push(row_pk);
+                delFeRows.push(i);
+            }
+            //console.log(rowNumber1, rowNumber2, delDbRows, delFeRows);
+          },
+          onundo: function(el,value) {
+            console.log(value);
+            if(undo.action == 'deleteRow'){
+              console.log(value.action, value.rowData[0]);
+            }else if (value.action == 'setValue'){
+              console.log(value.action, undo.records[0].col, value.records[0].row, value.records[0].oldValue);
+            }
+          },
+          oninsertrow: function(el, rowNumber, numOfRows, rowRecords, insertBefore) {
+            lastActionSave = false;
+            addFeRows.push(add);
+            categ.setStyle({ A1:'background-color: #eee;', B1:'background-color: #eee;', C1:'background-color: #eee;', D1:'background-color: #eee;', E1:'background-color: #eee;', F1:'background-color: #eee;' });
             add++;
             lastAction = true;
             insertStart = true;

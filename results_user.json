@@ -1,1 +1,1 @@
-[{"id": "admin", "email": "test@test.t", "password": "", "last_login": "2020-07-30 14:45:26", "admin": true, "active": true, "color": "#000000"}]
+[{"id": "admin", "email": "test@test", "password": "", "last_login": "2020-08-05 16:05:11", "admin": true, "active": true, "color": "#c8e6c9"},{"id": "test", "email": " ", "password": "", "last_login": "2020-08-05 18:07:57", "admin": false, "active": false, "color": "#f44336"}]

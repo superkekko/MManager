@@ -18,7 +18,13 @@ if (isset($_POST['action'])){
       $sql_exec = mysqli_query($db, $sql_query);
     }
     if($_POST['col'] == 2){
-      $sql_query = "update mov set val='$val' where mov_id=$pk";
+      if ($val < 0)
+      {
+        $type = N;
+      }else{
+        $type = P;
+      }
+      $sql_query = "update movement set val='$val', type='$type' where mov_id=$pk";
       echo $sql_query;
       $sql_exec = mysqli_query($db, $sql_query);
     }
