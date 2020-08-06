@@ -1,8 +1,86 @@
-<?php include('header.html');
-
+<?php
+error_log('problem!');
+include('header.html');
 include('session.php');
-
 include('action.php');
+
+if (file_exists('upload.log')) {
+  header('Content-Description: File Transfer');
+  header('Content-Type: application/octet-stream');
+  header('Content-Disposition: attachment; filename="'.basename('upload.log').'"');
+  header('Expires: 0');
+  header('Cache-Control: must-revalidate');
+  header('Pragma: public');
+  header('Content-Length: ' . filesize('upload.log'));
+  readfile('upload.log');
+  unlink('upload.log');
+  exit;
+}
+
+if (file_exists('import.log')) {
+  header('Content-Description: File Transfer');
+  header('Content-Type: application/octet-stream');
+  header('Content-Disposition: attachment; filename="'.basename('import.log').'"');
+  header('Expires: 0');
+  header('Cache-Control: must-revalidate');
+  header('Pragma: public');
+  header('Content-Length: ' . filesize('import.log'));
+  readfile('import.log');
+  unlink('import.log');
+  exit;
+}
+
+if(isset($_FILES['file']['tmp_name'])) {
+  if(is_uploaded_file($_FILES['file']['tmp_name'])) {
+    $err=0;
+    $file = $_FILES['file']['tmp_name'];
+    $handle = fopen($file, "r");
+    $c = 0;
+    $i = 0;
+
+    $sql_del = "delete from importcsv";
+    mysqli_query($db, $sql_del);
+
+    while(($filesop = fgetcsv($handle, 1000, ";")) !== false) {
+      $dat_mov = mysqli_real_escape_string($db, $filesop[0]);
+      $description = mysqli_real_escape_string($db, $filesop[1]);
+      $value = str_replace('.', '', mysqli_real_escape_string($db, $filesop[2]));
+
+      if ($i>0){
+        $sql_file = "INSERT INTO importcsv (dat_mov, description, value, usr_mov) VALUES ('$dat_mov', '$description', '$value', '$user')";
+        $result_sql = mysqli_query($db, $sql_file);
+        if (!$result_sql){
+          if ($err==0){
+            $filename='upload.log';
+            $log = "Upload log ".date('d/m/Y h:m:s')."\n";
+            $err = 1;
+          }
+          $log .= "not loaded (".mysqli_error($db)."): ".$dat_mov." | ".$description." | ".$value."\n";
+        }
+      }
+      $i=$i+1;
+      if ($err==1){
+        file_put_contents($filename, $log);
+      }
+    }
+    $sql_file = "CALL csv_import()";
+    mysqli_query($db, $sql_file);
+
+    $sql_ver = "select * from importcsv c where c.mov_imp = ''";
+    $result_ver = mysqli_query($db, $sql_ver);
+    $count      = mysqli_num_rows($result_ver);
+    echo $count;
+    if ($count > 0){
+      $filename_imp='import.log';
+      $imp = "Import log ".date('d/m/Y h:m:s')."\n";
+      while ($res_usr = mysqli_fetch_array($result_ver, MYSQLI_ASSOC)){
+        $imp .= "not imported: ".$res_usr['dat_mov']." | ".$res_usr['description']." | ".$res_usr['value']."\n";
+      }
+      file_put_contents($filename_imp, $imp);
+    }
+    echo '<META HTTP-EQUIV="Refresh" Content="0; URL=movements.html">';
+    }
+  }
 
 //localization
 include('../locale/'.$_SESSION['lang'].'.php');
@@ -38,12 +116,51 @@ $sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
 $user = $sql_row['user'];
 ?>
 
+<!-- Logout Modal-->
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Seleziona un file csv da caricare</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <form name="upload" method="post" action="movements.html" role="form" enctype="multipart/form-data">
+      <div class="modal-body">
+        <div class="custom-file">
+          <input type="file" name="file" class="custom-file-input" id="customFile" required>
+          <label class="custom-file-label" for="customFile">Seleziona un file...</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+        <input type="submit" name="submit" value="Carica" class="btn btn-primary">
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="modal-body">
+  <form name="upload" method="post" action="movements.html" role="form" enctype="multipart/form-data">
+  <div class="col-8 custom-file">
+    <input type="file" class="custom-file-input" id="customFile" required>
+    <label class="custom-file-label" for="customFile">Seleziona un file...</label>
+  </div>
+  <div class="col-2 custom-file">
+    <input type="submit" name="submit" value="Carica" class="btn btn-primary">
+  </div>
+</form>
+</div> -->
+
         <!-- Begin Page Content -->
         <div class="container-fluid">
 
           <!-- Page Heading -->
           <h1 class="h3 mb-2 text-gray-800">Movements</h1>
           <p class="mb-4" style="text-align:right">
+            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='upload'data-toggle="modal" data-target="#uploadModal"><i class="fas fa-upload fa-sm text-white-50"></i> Upload</a>
             <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='download'><i class="fas fa-download fa-sm text-white-50"></i> Download</a>
             <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='undo'><i class="fas fa-undo fa-sm text-white-50"></i> Undo</a> -->
             <a href="#" onclick="mySpreadsheet.insertRow(1,0,true)" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Add row</a>
