@@ -1,4 +1,21 @@
-<?php $page_name=basename($_SERVER['PHP_SELF']); ?>
+<?php
+$page_name=basename($_SERVER['PHP_SELF']);
+
+if (!isset($user)) {
+    $user = $_SESSION['login_user'];
+}
+
+$sql_admin    = "select * from user where usr_id='$user' and admin='S'";
+$result_admin = mysqli_query($db, $sql_admin);
+$count_admin  = mysqli_num_rows($result_admin);
+
+if (isset($_POST['ch_pwd'])) {
+    $pwd     = mysqli_real_escape_string($db, $_POST['ch_pwd']);
+    $sql_pwd = "update user set passwd = sha1('$pwd') where usr_id='$user'";
+    mysqli_query($db, $sql_pwd);
+}
+
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -86,19 +103,46 @@
         Impostazioni
       </div>
 
+      <!-- Password Modal-->
+      <div class="modal fade" id="passwdModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Inserisci la nuova password</h5>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <form name="password" method="post" action="#" role="form">
+            <div class="modal-body">
+              <div class="form-group">
+                <input type="password" class="form-control" id="password" name="ch_pwd" placeholder="Password">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+              <input type="submit" name="submit" value="Salva" class="btn btn-primary">
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
       <!-- Nav Item - Tables -->
       <li class="nav-item <?php if($page_name=='password.html'){echo 'active';}; ?>">
-        <a class="nav-link" href="password.html">
+        <a class="nav-link" href="#" data-toggle="modal" data-target="#passwdModal">
           <i class="fas fa-fw fa-wrench"></i>
           <span>Cambio password</span></a>
       </li>
 
       <!-- Nav Item - Tables -->
-      <li class="nav-item <?php if($page_name=='admin.html'){echo 'active';}; ?>">
-        <a class="nav-link" href="admin.html">
-          <i class="fas fa-fw fa-cog"></i>
-          <span>Admin</span></a>
-      </li>
+      <?php
+      if($count_admin>0){
+        if($page_name=='admin.html'){
+          echo '<li class="nav-item active"> <a class="nav-link" href="admin.html"> <i class="fas fa-fw fa-cog"></i> <span>Admin</span></a></li>';
+        }
+        echo '<li class="nav-item"> <a class="nav-link" href="admin.html"> <i class="fas fa-fw fa-cog"></i> <span>Admin</span></a></li>';
+      } ?>
 
       <!-- Nav Item - Tables -->
       <li class="nav-item">
@@ -110,10 +154,10 @@
       <!-- Divider -->
       <hr class="sidebar-divider d-none d-md-block">
 
-      <!-- Sidebar Toggler (Sidebar) -->
+      <!-- Sidebar Toggler (Sidebar)
       <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
-      </div>
+      </div> -->
 
     </ul>
     <!-- End of Sidebar -->

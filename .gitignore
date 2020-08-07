@@ -29,6 +29,7 @@
 # il carattere * effettua il match di zero o più caratteri
 # vengono ignorati i file come archivio.zip o cartella/archivio.zip
 *.json
+*.log
 
 # il carattere ! nega il pattern specificato
 # i file che per qualche regola precedente vengono ignorati,
