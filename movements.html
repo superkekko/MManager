@@ -141,8 +141,8 @@ $('#customFile').on('change', function(){
           </p>
 
           <!-- DataTales Example -->
-          <div class="card shadow mb-4">
-            <div id="table" class="card-body">
+          <div class="card shadow mb-4" id="table">
+            <div class="card-body">
              <div id="spreadsheet"></div>
             </div>
           </div>
@@ -258,11 +258,27 @@ $('#customFile').on('change', function(){
           insertStart = false;
         }
 
-        var divDimension = document.getElementById("table").offsetWidth;
-        //sidebar aperta
-        console.log(divDimension);
-        divDimension = divDimension - 120
-        var noteDimension = divDimension - 620;
+        var windowDimension = window.innerWidth;
+        var sidebarDimension = document.getElementById("accordionSidebar").offsetWidth;
+        console.log(windowDimension, sidebarDimension);
+        var tableDimension = windowDimension - sidebarDimension - 170
+        var noteDimension = tableDimension - 620;
+        
+        function refreshtable(){
+        var windowDimension = window.innerWidth;
+        var sidebarDimension = document.getElementById("accordionSidebar").offsetWidth;
+        if (sidebarDimension == 224){
+          sidebarDimension = 104;
+        }else{
+          sidebarDimension = 224;
+        }
+        console.log(windowDimension, sidebarDimension);
+        var tableDimension = windowDimension - sidebarDimension - 170
+        var noteDimension = tableDimension - 620;
+        mySpreadsheet.setWidth(5, noteDimension);
+        }
+
+        window.addEventListener("resize", refreshtable);
 
         var mySpreadsheet = jexcel(document.getElementById('spreadsheet'), {
             url:'results.json',
@@ -272,7 +288,7 @@ $('#customFile').on('change', function(){
             tableOverflow:true,
             lazyLoading:true,
             loadingSpin:true,
-            tableWidth: divDimension,
+            tableWidth: tableDimension,
             tableHeight: '500px',
             defaultColWidth: 150,
             contextMenu: false,
@@ -368,7 +384,7 @@ $('#customFile').on('change', function(){
             insertStart = true;
             //console.log(addFeRows);
           }
-        });
+        });        
       </script>
 
 <?php include('footer.html'); ?>

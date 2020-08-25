@@ -195,11 +195,30 @@ $user = $sql_row['user'];
           insertStart = false;
         }
 
-        var divDimension = document.getElementById('users_table').offsetWidth;
-        //sidebar aperta
-        console.log(divDimension);
-        divDimension = divDimension - 120
-        var emailDimension = divDimension - 850;
+        var windowDimension = window.innerWidth;
+        var sidebarDimension = document.getElementById("accordionSidebar").offsetWidth;
+        console.log(windowDimension, sidebarDimension);
+        var tableDimension = windowDimension - sidebarDimension - 170
+        var emailDimension = tableDimension - 900;
+        var textDimension = tableDimension - 550;
+        
+        function refreshtable(){
+        var windowDimension = window.innerWidth;
+        var sidebarDimension = document.getElementById("accordionSidebar").offsetWidth;
+        if (sidebarDimension == 224){
+          sidebarDimension = 104;
+        }else{
+          sidebarDimension = 224;
+        }
+        console.log(windowDimension, sidebarDimension);
+        var tableDimension = windowDimension - sidebarDimension - 170
+        var emailDimension = tableDimension - 900;
+        users.setWidth(1, emailDimension);
+        var textDimension = tableDimension - 550;
+        categ.setWidth(6, textDimension);
+        }
+
+        window.addEventListener("resize", refreshtable);
 
         var users = jexcel(document.getElementById('users_table'), {
             url:'results_user.json',
@@ -209,7 +228,7 @@ $user = $sql_row['user'];
             //tableOverflow:true,
             //lazyLoading:true,
             //loadingSpin:true,
-            tableWidth: divDimension,
+            tableWidth: tableDimension,
             tableHeight: '700px',
             defaultColWidth: 150,
             contextMenu: false,
@@ -356,12 +375,6 @@ $user = $sql_row['user'];
           insertStart = false;
         }
 
-        var divDimension = document.getElementById('categ_table').offsetWidth;
-        //sidebar aperta
-        console.log(divDimension);
-        divDimension = divDimension - 120
-        var textDimension = divDimension - 500;
-
         var categ = jexcel(document.getElementById('categ_table'), {
             url:'results_cat.json',
             search:true,
@@ -370,7 +383,7 @@ $user = $sql_row['user'];
             tableOverflow:true,
             lazyLoading:true,
             loadingSpin:true,
-            tableWidth: divDimension,
+            tableWidth: tableDimension,
             tableHeight: '700px',
             defaultColWidth: 150,
             contextMenu: false,
