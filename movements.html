@@ -1,56 +1,7 @@
 <?php
 include('session.php');
 include('header.html');
-include('action.php');
-
-if(isset($_FILES['file']['tmp_name'])) {
-  if(is_uploaded_file($_FILES['file']['tmp_name'])) {
-    error_log('EE - inizio lettura file');
-    $filename='import.log';
-    $log = "log ".date('d/m/Y h:m:s')."\n";
-    $err=0;
-    $file = $_FILES['file']['tmp_name'];
-    $handle = fopen($file, "r");
-    $c = 0;
-    $i = 0;
-
-    $sql_del = "delete from importcsv";
-    mysqli_query($db, $sql_del);
-
-    while(($filesop = fgetcsv($handle, 1000, ";")) !== false) {
-      $dat_mov = mysqli_real_escape_string($db, $filesop[0]);
-      $description = mysqli_real_escape_string($db, $filesop[1]);
-      $user = mysqli_real_escape_string($db, $filesop[2]);
-      $value = str_replace('.', '', mysqli_real_escape_string($db, $filesop[3]));
-
-      if ($i>0){
-        $sql_file = "INSERT INTO importcsv (dat_mov, description, value, usr_mov) VALUES ('$dat_mov', '$description', '$value', '$user')";
-        error_log('EE - '.$sql_file);
-        $result_sql = mysqli_query($db, $sql_file);
-        if (!$result_sql){
-          $log .= "not loaded (".mysqli_error($db)."): ".$dat_mov." | ".$description." | ".$user." | ".$value."\n";
-        }
-      }
-      $i=$i+1;
-    }
-    $sql_file = "CALL csv_import()";
-    mysqli_query($db, $sql_file);
-
-    $log .="\n";
-
-    $sql_ver = "select * from importcsv c where c.mov_imp = ''";
-    $result_ver = mysqli_query($db, $sql_ver);
-    $count      = mysqli_num_rows($result_ver);
-    if ($count > 0){
-      while ($res_usr = mysqli_fetch_array($result_ver, MYSQLI_ASSOC)){
-        $log .= "not imported: ".$res_usr['dat_mov']." | ".$res_usr['description']." | ".$res_usr['usr_mov']." | ".$res_usr['value']."\n";
-      }
-    }
-    error_log('EE - '.$log);
-    file_put_contents($filename, $log);
-    $log = true;
-    }
-  }
+include('uploader.php');
 
 //localization
 //include('../locale/'.$_SESSION['lang'].'.php');
@@ -66,24 +17,6 @@ for ($i = 5; $i >= 0; $i--) {
   $months_desc[] = ucwords(strftime('%B - %Y', strtotime(date("Y-m", strtotime( date( 'Y-m-01' )." -$i months")))));
 }
 $color = array("text-primary","text-success","text-info","text-warning","text-danger");
-
-// get detail
-$sql_query = "select mov_id, cat_name, val, dat_mov, usr_mov, note from mov";
-$sql_exec = mysqli_query($db, $sql_query);
-$val_det = array();
-while($sql_row = mysqli_fetch_assoc($sql_exec)) {
-    $val_det[]=$sql_row;
-  };
-
-$sql_query = "SELECT GROUP_CONCAT(CONCAT('\"',cat_name,'\"')) as category FROM cat";
-$sql_exec = mysqli_query($db, $sql_query);
-$sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
-$category = $sql_row['category'];
-
-$sql_query = "SELECT GROUP_CONCAT(CONCAT('\"',usr_id,'\"')) as user FROM user";
-$sql_exec = mysqli_query($db, $sql_query);
-$sql_row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC);
-$user = $sql_row['user'];
 ?>
 
 <!-- Upload Modal-->
@@ -112,7 +45,7 @@ $user = $sql_row['user'];
   </div>
 </div>
 
-<script src="http://code.jquery.com/jquery-3.5.1.js"></script>
+<!-- Filename modal -->
 <script>
 $('#customFile').on('change', function(){
   files = $(this)[0].files; name = '';
@@ -122,270 +55,39 @@ $('#customFile').on('change', function(){
 });
 </script>
 
-        <!-- Begin Page Content -->
-        <div class="container-fluid">
+<!-- Begin Page Content -->
+<div class="container-fluid">
 
-          <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Movements</h1>
-          <p class="mb-4" style="text-align:right">
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='upload' data-toggle="modal" data-target="#uploadModal"><i class="fas fa-upload fa-sm text-white-50"></i> Upload</a>
-            <?php
-            if($log){
-              echo '<a href="import.log" target="_blank" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id="download_log"><i class="fas fa-file-alt fa-sm text-white-50"></i> Download log</a>';
-            } ?>
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='download'><i class="fas fa-download fa-sm text-white-50"></i> Download</a>
-            <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='undo'><i class="fas fa-undo fa-sm text-white-50"></i> Undo</a> -->
-            <a href="#" onclick="mySpreadsheet.insertRow(1,0,true)" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-plus fa-sm text-white-50"></i> Add row</a>
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='save'><i class="fas fa-save fa-sm text-white-50"></i> Save row(s)</a>
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='remove'><i class="fas fa-minus fa-sm text-white-50"></i> Delete selected row(s)</a>
-          </p>
+  <!-- Page Heading -->
+  <h1 class="h3 mb-2 text-gray-800">Movements</h1>
+  <p class="mb-4" style="text-align:right">
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='upload' data-toggle="modal" data-target="#uploadModal"><i class="fas fa-upload fa-sm text-white-50"></i> Upload</a>
+    <?php
+    if($log){
+      echo '<a href="import.log" target="_blank" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id="download_log"><i class="fas fa-file-alt fa-sm text-white-50"></i> Download log</a>';
+    } ?>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='download'><i class="fas fa-download fa-sm text-white-50"></i> Download</a>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='add'><i class="fas fa-plus fa-sm text-white-50"></i> Add row</a>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='delete'><i class="fas fa-minus fa-sm text-white-50"></i> Delete selected row(s)</a>
+  </p>
 
-          <!-- DataTales Example -->
-          <div class="card shadow mb-4" id="table">
-            <div class="card-body">
-             <div id="spreadsheet"></div>
-            </div>
-          </div>
+  <!-- DataTales Example -->
+  <div class="card shadow mb-4" id="table">
+    <div class="card-body">
+     <div id="movements-table"></div>
+    </div>
+  </div>
 
-        </div>
-        <!-- /.container-fluid -->
+</div>
+<!-- /.container-fluid -->
 
-      </div>
-      <!-- End of Main Content -->
+</div>
+<!-- End of Main Content -->
 
-      <script src="jexcel/jsuites.js"></script>
-      <script src="jexcel/jexcel.js"></script>
-      <script src="jexcel/accounting.js"></script>
-
-      <script>
-
-      var myRequest = null;
-
-      function CreateXmlHttpReq(handler) {
-        var xmlhttp = null;
-        xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = handler;
-        return xmlhttp;
-      }
-
-      function myHandler() {
-          if (myRequest.readyState == 4 && myRequest.status == 200) {
-              console.log(myRequest.responseText);
-              mySpreadsheet.refresh();
-          }
-      }
-
-        var delDbRows = [];
-        var delFeRows = [];
-        var addFeRows = [];
-        var addDbRows = [];
-        var add = 0;
-        var lastAction = true;
-        var lastActionSave = false;
-        var insertStart = false;
-
-        /* document.getElementById('undo').onclick = function () {
-          if(lastAction){
-            if(!lastActionSave){
-              mySpreadsheet.undo();
-            }else{
-              console.log(addDbRows);
-              for(let i=1;i<=addDbRows.length;i++)
-              {
-                mySpreadsheet.deleteRow(0);
-              }
-              lastActionSave = false;
-            }
-          }
-          lastAction = false;
-        }*/
-
-        document.getElementById('download').onclick = function () {
-            mySpreadsheet.download(false);
-        }
-
-        document.getElementById('remove').onclick = function () {
-          var first = true;
-          delFeRows.forEach(function (item) {
-            if (first){
-              mySpreadsheet.deleteRow(item);
-              first = false;
-            }else{
-              mySpreadsheet.deleteRow(item-1);
-            }
-            if (delDbRows !== " "){
-              console.log(delDbRows);
-              myRequest = CreateXmlHttpReq(myHandler);
-              myRequest.open("POST","action.php");
-              myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-              myRequest.send("pk="+delDbRows+"&action=delete");
-            }
-            mySpreadsheet.getJson();
-          })
-        }
-
-        document.getElementById('save').onclick = function () {
-          addFeRows.forEach(function (item) {
-            var row = 'A'.concat(item+1);
-            mySpreadsheet.setStyle(row, 'background-color', 'white');
-            var row = 'B'.concat(item+1);
-            mySpreadsheet.setStyle(row, 'background-color', 'white');
-            var row = 'C'.concat(item+1);
-            mySpreadsheet.setStyle(row, 'background-color', 'white');
-            var row = 'D'.concat(item+1);
-            mySpreadsheet.setStyle(row, 'background-color', 'white');
-            var row = 'E'.concat(item+1);
-            mySpreadsheet.setStyle(row, 'background-color', 'white');
-            var row = 'F'.concat(item+1);
-            mySpreadsheet.setStyle(row, 'background-color', 'white');
-            addDbRows[item] = mySpreadsheet.getRowData(item);
-            //console.log('A'.concat(item+1));
-          })
-          console.log(addDbRows);
-          var cat = addDbRows[0][1];
-          var curr = accounting.unformat(addDbRows[0][2], ",");
-          var date = addDbRows[0][3];
-          var usr = addDbRows[0][4];
-          var note = addDbRows[0][5];
-          myRequest = CreateXmlHttpReq(myHandler);
-          myRequest.open("POST","action.php");
-          myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-          myRequest.send("cat="+cat+"&value="+curr+"&date="+date+"&usr="+usr+"&note="+note+"&action=save");
-          addFeRows = [];
-          add = 0;
-          lastActionSave = true;
-          lastAction = true;
-          insertStart = false;
-        }
-
-        var windowDimension = window.innerWidth;
-        var sidebarDimension = document.getElementById("accordionSidebar").offsetWidth;
-        console.log(windowDimension, sidebarDimension);
-        var tableDimension = windowDimension - sidebarDimension - 170
-        var noteDimension = tableDimension - 620;
-        
-        function refreshtable(){
-        var windowDimension = window.innerWidth;
-        var sidebarDimension = document.getElementById("accordionSidebar").offsetWidth;
-        if (sidebarDimension == 224){
-          sidebarDimension = 104;
-        }else{
-          sidebarDimension = 224;
-        }
-        console.log(windowDimension, sidebarDimension);
-        var tableDimension = windowDimension - sidebarDimension - 170
-        var noteDimension = tableDimension - 620;
-        mySpreadsheet.setWidth(5, noteDimension);
-        }
-
-        window.addEventListener("resize", refreshtable);
-
-        var mySpreadsheet = jexcel(document.getElementById('spreadsheet'), {
-            url:'results.json',
-            search:true,
-            //pagination:true,
-            //pagination:50,
-            tableOverflow:true,
-            lazyLoading:true,
-            loadingSpin:true,
-            tableWidth: tableDimension,
-            tableHeight: '500px',
-            defaultColWidth: 150,
-            contextMenu: false,
-            //filters:true,
-            includeHeadersOnDownload:true,
-            csvFileName:'movements',
-            columns: [
-                {
-                    type: 'hidden',
-                    title:'ID',
-                    //width:150
-                },
-                {
-                    type: 'dropdown',
-                    title:'Categoria',
-                    source:[<?php echo $category; ?>],
-                    autocomplete: true,
-                    width:200
-                },
-                {
-                    type: 'numeric',
-                    title:'Valore',
-                    mask:'[-]€ #.##,00',
-                    width:150,
-                    decimal:','
-                },
-                {
-                    type: 'calendar',
-                    options: { format:'DD/MM/YYYY' },
-                    title:'Data',
-                    width:120
-                },
-                {
-                    type: 'dropdown',
-                    title:'Utente',
-                    source:[<?php echo $user; ?>],
-                    autocomplete: true,
-                    width:150
-                },
-                {
-                    type: 'text',
-                    title:'Note',
-                    width:noteDimension,
-                    align: 'left'
-                },
-             ],
-          onchange: function(el,cell,colNumber,rowNumber,value,old_value) {
-            lastActionSave = false;
-            var row_data = mySpreadsheet.getRowData(rowNumber);
-            var row_pk = row_data[0];
-            if(colNumber == 2){
-              var val=accounting.unformat(value, ",");
-            }else{
-              var val = value;
-            }
-            if (row_pk !== ""){
-              console.log(row_pk,colNumber,value);
-            }
-            if (!insertStart){
-              myRequest = CreateXmlHttpReq(myHandler);
-              myRequest.open("POST","action.php");
-              myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      	      myRequest.send("pk="+row_pk+"&col="+colNumber+"&value="+val+"&action=edit");
-              lastAction = true;
-            }
-          },
-          onselection: function(instance,colNumber1,rowNumber1,colNumber2,rowNumber2) {
-            delDbRows = [];
-            delFeRows = [];
-            for(let i=rowNumber1;i<=rowNumber2;i++)
-            {
-                var row_data = mySpreadsheet.getRowData(i);
-                var row_pk = row_data[0];
-      		      delDbRows.push(row_pk);
-                delFeRows.push(i);
-      	    }
-            //console.log(rowNumber1, rowNumber2, delDbRows, delFeRows);
-          },
-          onundo: function(el,value) {
-            console.log(value);
-            if(undo.action == 'deleteRow'){
-              console.log(value.action, value.rowData[0]);
-            }else if (value.action == 'setValue'){
-              console.log(value.action, undo.records[0].col, value.records[0].row, value.records[0].oldValue);
-            }
-          },
-          oninsertrow: function(el, rowNumber, numOfRows, rowRecords, insertBefore) {
-            lastActionSave = false;
-            addFeRows.push(add);
-            mySpreadsheet.setStyle({ A1:'background-color: #eee;', B1:'background-color: #eee;', C1:'background-color: #eee;', D1:'background-color: #eee;', E1:'background-color: #eee;', F1:'background-color: #eee;' });
-            add++;
-            lastAction = true;
-            insertStart = true;
-            //console.log(addFeRows);
-          }
-        });        
-      </script>
+<script type="text/javascript" src="tabulator/dist/js/tabulator.js"></script>
+<script type="text/javascript" src="tabulator/moment.js"></script>
+<script type="text/javascript" src="movements.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
 
 <?php include('footer.html'); ?>
 
