@@ -22,7 +22,6 @@ if (isset($_POST['ch_pwd'])) {
 <html lang="en">
 
 <head>
-
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -32,133 +31,137 @@ if (isset($_POST['ch_pwd'])) {
   <title>MManager - Dashboard</title>
 
   <!-- favicon -->
-  <link rel="apple-touch-icon" sizes="57x57" href="icon/apple-icon-57x57.png">
-  <link rel="apple-touch-icon" sizes="60x60" href="icon/apple-icon-60x60.png">
-  <link rel="apple-touch-icon" sizes="72x72" href="icon/apple-icon-72x72.png">
-  <link rel="apple-touch-icon" sizes="76x76" href="icon/apple-icon-76x76.png">
-  <link rel="apple-touch-icon" sizes="114x114" href="icon/apple-icon-114x114.png">
-  <link rel="apple-touch-icon" sizes="120x120" href="icon/apple-icon-120x120.png">
-  <link rel="apple-touch-icon" sizes="144x144" href="icon/apple-icon-144x144.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="icon/apple-icon-152x152.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-icon-180x180.png">
-  <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="icon/favicon-96x96.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="icon/favicon-16x16.png">
-  <link rel="manifest" href="icon/manifest.json">
+  <link rel="apple-touch-icon" sizes="57x57" href="img/icon/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="img/icon/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="img/icon/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="img/icon/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="img/icon/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="img/icon/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="img/icon/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="img/icon/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/icon/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="img/icon/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="img/icon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/icon/favicon-16x16.png">
+  <link rel="manifest" href="img/icon/manifest.json">
   <meta name="msapplication-TileColor" content="#ffffff">
-  <meta name="msapplication-TileImage" content="icon/ms-icon-144x144.png">
+  <meta name="msapplication-TileImage" content="img/icon/ms-icon-144x144.png">
   <meta name="theme-color" content="#ffffff">
 
-  <!-- Custom fonts for this template-->
-  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <!-- Custom CSS-->
+  <link href="css/fontawesome/css/all.min.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
-  <link href="tabulator/dist/css/bootstrap/tabulator_bootstrap.min.css" rel="stylesheet">
-  
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
-  <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
+  <link href="css/tabulator/tabulator_bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="js/jquery/jquery.min.js"></script>
+  <script src="js/bootstrap/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="js/jquery-easing/jquery.easing.min.js"></script>
 
 </head>
 
+<!-- Password Modal-->
+<div class="modal fade" id="passwdModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Inserisci la nuova password</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <form name="password" method="post" action="#" role="form">
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="password" class="form-control" id="password" name="ch_pwd" placeholder="Password">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+        <input type="submit" name="submit" value="Salva" class="btn btn-primary">
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
 <body id="page-top">
 
-  <!-- Page Wrapper -->
-  <div id="wrapper">
+<!-- Page Wrapper -->
+<div id="wrapper">
 
-    <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-      <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-        <div class="sidebar-brand-icon">
-          <img src="logo.svg" height="40px">
-        </div>
-        <div class="sidebar-brand-text mx-3">MManager</div>
-      </a>
+  <!-- Sidebar - Logo -->
+  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+    <div class="sidebar-brand-icon">
+      <img src="img/logo.svg" height="40px">
+    </div>
+    <div class="sidebar-brand-text mx-3">MManager</div>
+  </a>
 
-      <!-- Divider -->
-      <hr class="sidebar-divider my-0">
+  <!-- Divider -->
+  <hr class="sidebar-divider my-0">
 
-      <!-- Nav Item - Dashboard -->
-      <li class="nav-item <?php if($page_name=='index.html'){echo 'active';}; ?>">
-        <a class="nav-link" href="index.html">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span></a>
-      </li>
+  <!-- Nav Item - Dashboard -->
+  <li class="nav-item <?php if($page_name=='index.html'){echo 'active';}; ?>">
+    <a class="nav-link" href="index.html">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Dashboard</span></a>
+  </li>
 
-      <!-- Nav Item - Charts -->
-      <li class="nav-item <?php if($page_name=='movements.html'){echo 'active';}; ?>">
-        <a class="nav-link" href="movements.html">
-          <i class="fas fa-fw fa-table"></i>
-          <span>Dettagli</span></a>
-      </li>
+  <!-- Nav Item - Movements -->
+  <li class="nav-item <?php if($page_name=='movements.html'){echo 'active';}; ?>">
+    <a class="nav-link" href="movements.html">
+      <i class="fas fa-fw fa-table"></i>
+      <span>Dettagli</span></a>
+  </li>
 
-      <!-- Divider -->
-      <hr class="sidebar-divider">
+  <!-- Divider -->
+  <hr class="sidebar-divider">
 
-      <!-- Heading -->
-      <div class="sidebar-heading">
-        Impostazioni
-      </div>
+  <!-- Heading -->
+  <div class="sidebar-heading">
+    Impostazioni
+  </div>
 
-      <!-- Password Modal-->
-      <div class="modal fade" id="passwdModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Inserisci la nuova password</h5>
-              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            <form name="password" method="post" action="#" role="form">
-            <div class="modal-body">
-              <div class="form-group">
-                <input type="password" class="form-control" id="password" name="ch_pwd" placeholder="Password">
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-              <input type="submit" name="submit" value="Salva" class="btn btn-primary">
-            </div>
-          </form>
-          </div>
-        </div>
-      </div>
+  <!-- Nav Item - Password -->
+  <li class="nav-item">
+    <a class="nav-link" href="#" data-toggle="modal" data-target="#passwdModal">
+      <i class="fas fa-fw fa-wrench"></i>
+      <span>Cambio password</span></a>
+  </li>
 
-      <!-- Nav Item - Tables -->
-      <li class="nav-item <?php if($page_name=='password.html'){echo 'active';}; ?>">
-        <a class="nav-link" href="#" data-toggle="modal" data-target="#passwdModal">
-          <i class="fas fa-fw fa-wrench"></i>
-          <span>Cambio password</span></a>
-      </li>
+  <!-- Nav Item - Admin -->
+  <?php
+  if($count_admin>0){
+    if($page_name=='admin.html'){
+      echo '<li class="nav-item active"> <a class="nav-link" href="admin.html"> <i class="fas fa-fw fa-cog"></i> <span>Admin</span></a></li>';
+    }else{
+    echo '<li class="nav-item"> <a class="nav-link" href="admin.html"> <i class="fas fa-fw fa-cog"></i> <span>Admin</span></a></li>';
+    }
+  }
+  ?>
 
-      <!-- Nav Item - Tables -->
-      <?php
-      if($count_admin>0){
-        if($page_name=='admin.html'){
-          echo '<li class="nav-item active"> <a class="nav-link" href="admin.html"> <i class="fas fa-fw fa-cog"></i> <span>Admin</span></a></li>';
-        }
-        echo '<li class="nav-item"> <a class="nav-link" href="admin.html"> <i class="fas fa-fw fa-cog"></i> <span>Admin</span></a></li>';
-      } ?>
+  <!-- Nav Item - Logout -->
+  <li class="nav-item">
+    <a class="nav-link" href="logout.php">
+      <i class="fas fa-fw fa-sign-out-alt"></i>
+      <span>Logout</span></a>
+  </li>
 
-      <!-- Nav Item - Tables -->
-      <li class="nav-item">
-        <a class="nav-link" href="logout.php">
-          <i class="fas fa-fw fa-sign-out-alt"></i>
-          <span>Logout</span></a>
-      </li>
+  <!-- Divider -->
+  <hr class="sidebar-divider d-none d-md-block">
 
-      <!-- Divider -->
-      <hr class="sidebar-divider d-none d-md-block">
+  <!-- Sidebar Toggler (Sidebar) -->
+  <div class="text-center d-none d-md-inline">
+    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+  </div>
 
-      <!-- Sidebar Toggler (Sidebar) -->
-      <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" onclick="refreshtable()" id="sidebarToggle"></button>
-      </div>
-
-    </ul>
-    <!-- End of Sidebar -->
+</ul>
+<!-- End of Sidebar -->

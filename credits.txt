@@ -1,0 +1,8 @@
+Font Awesome Free 5.10.2 (https://fontawesome.com)
+Tabulator 4.7.2 (http://tabulator.info/)
+SB Admin 2 4.0.7 (https://startbootstrap.com/template-overviews/sb-admin-2)
+Bootstrap 4.3.1 (https://getbootstrap.com/)
+Chart.js 2.8.0 (https://www.chartjs.org)
+jQuery 3.5.1 (https://jquery.com/)
+jQuery Easing 1.4.1 (http://gsgd.co.uk/sandbox/jquery/easing/)
+moment.js 2.28.0 (http://momentjs.com)

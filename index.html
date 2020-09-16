@@ -1,5 +1,6 @@
 <?php
 include('session.php');
+include('header.html');
 
 //localization
 include('./locale/'.$_SESSION['lang'].'.php');
@@ -73,8 +74,6 @@ while ($row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC)) {
     $cat_value[]= array_map('ucfirst', $row);
 };
 ?>
-
-<?php include('header.html'); ?>
 
     <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
@@ -261,10 +260,8 @@ while ($row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC)) {
       </div>
       <!-- End of Main Content -->
 
-<?php include('footer.html'); ?>
-
   <!-- Page level plugins -->
-  <script src="vendor/chart.js/Chart.min.js"></script>
+  <script src="js/chart-js/chart.min.js"></script>
 
   <!-- Bar chart JS -->
   <script>
@@ -421,6 +418,8 @@ while ($row = mysqli_fetch_array($sql_exec, MYSQLI_ASSOC)) {
     });
 
   </script>
+  
+<?php include('footer.html'); ?>
 
 </body>
 

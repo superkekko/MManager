@@ -2,21 +2,6 @@
 include('session.php');
 include('header.html');
 include('uploader.php');
-
-//localization
-//include('../locale/'.$_SESSION['lang'].'.php');
-setlocale(LC_ALL, 'ita');
-
-//variables
-$cur_yea = strftime("%Y");
-$cur_month = strftime("%m");
-$cur_user = $_SESSION['login_user'];
-//get previous 6 months
-for ($i = 5; $i >= 0; $i--) {
-  $months[] = date("Y-n", strtotime( date( 'Y-n-01' )." -$i months"));
-  $months_desc[] = ucwords(strftime('%B - %Y', strtotime(date("Y-m", strtotime( date( 'Y-m-01' )." -$i months")))));
-}
-$color = array("text-primary","text-success","text-info","text-warning","text-danger");
 ?>
 
 <!-- Upload Modal-->
@@ -45,15 +30,8 @@ $color = array("text-primary","text-success","text-info","text-warning","text-da
   </div>
 </div>
 
-<!-- Filename modal -->
-<script>
-$('#customFile').on('change', function(){
-  files = $(this)[0].files; name = '';
-  for(var i = 0; i < files.length; i++){
-    name += '\"' + files[i].name + '\"' + (i != files.length-1 ? ", " : "");
-  } $(".custom-file-label").html(name);
-});
-</script>
+<!-- Filename modal JS -->
+<script type="text/javascript" src="js/filename.js"></script>
 
 <!-- Begin Page Content -->
 <div class="container-fluid">
@@ -71,7 +49,7 @@ $('#customFile').on('change', function(){
     <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id='delete'><i class="fas fa-minus fa-sm text-white-50"></i> Delete selected row(s)</a>
   </p>
 
-  <!-- DataTales Example -->
+  <!-- Movements Table -->
   <div class="card shadow mb-4" id="table">
     <div class="card-body">
      <div id="movements-table"></div>
@@ -84,13 +62,13 @@ $('#customFile').on('change', function(){
 </div>
 <!-- End of Main Content -->
 
-<script type="text/javascript" src="tabulator/dist/js/tabulator.js"></script>
-<script type="text/javascript" src="tabulator/moment.js"></script>
-<script type="text/javascript" src="movements.js"></script>
+<!-- JS Tabulator -->
+<script type="text/javascript" src="js/tabulator/tabulator.js"></script>
+<script type="text/javascript" src="js/moment/moment.js"></script>
+<script type="text/javascript" src="js/movements.js"></script>
 <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
 
 <?php include('footer.html'); ?>
 
 </body>
-
 </html>
