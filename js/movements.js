@@ -1,5 +1,5 @@
 //enable debug console logs
-var debug = true;
+var debug = false;
 
 //ajax calls
 var myRequest = null;
@@ -97,7 +97,7 @@ const table = new Tabulator("#movements-table", {
 			myRequest.open("POST","action/editor.php");
 			myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			myRequest.send("pk="+id+"&col="+col+"&value="+value+"&action=mov-edit");
-			usersTable.setData();
+			table.setData();
 		}else{
 			var cat_id = cell._cell.row.data.cat_id;
 			var dat_mov = cell._cell.row.data.dat_mov;
@@ -114,7 +114,7 @@ const table = new Tabulator("#movements-table", {
 				myRequest.open("POST","action/editor.php");
 				myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 				myRequest.send("cat="+cat_id+"&value="+val+"&usr="+usr_mov+"&note="+note+"&date="+dat_mov+"&action=mov-save");
-				usersTable.setData();
+				table.setData();
 			}else{
 				if(debug){console.log('no complete data');}
 			}

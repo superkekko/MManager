@@ -1,5 +1,5 @@
 //enable debug console logs
-var debug = true;
+var debug = false;
 
 //ajax calls
 var myRequest = null;
