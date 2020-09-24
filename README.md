@@ -1,37 +1,24 @@
 # MManager
-Un semplice gestore delle spese famigliari - A simple personal finance manager
-
-![dashboard](https://cloud.githubusercontent.com/assets/25342565/23645958/0a9dc4a2-030f-11e7-82ae-bd34b80f13e9.png)
+Un semplice gestore delle spese famigliari
 
 ## Come si installa
 1. Installa apache 2.4, php 7 e mysql (ad esempio architetture WAMP o LAMP);
 2. Carica i file nin una cartella (solitamente `mmanager` sotto `www`);
 3. Crea il lo schema mysql;
 4. Imposta i valori di configurazione del DB nel file `config.php` (server, username, password, database);
-5. Collegati su `http://localhost/install.php` e premi il bottone `Installa`;
+5. Collegati sul DB e lanciare gli sql da install.sql a tutte le update presenti nella cartella install-update
 6. Una volta completata la procedura collegati a `http://localhost/index.php` (la prima connessione è da fare con l'utente `admin/admin`);
 
 ## Come si aggiorna
 - Per aggiornare la versione web scaricare la release più recente;
-- Per aggiornare il db andare in Impostazioni e cliccare su aggiornamento.
-
-## How to install
-1. Install apache 2.4, php 7 and mysql (WAMP or LAMP server);
-2. Put the files in a folder (usually `mmanager` under `www`);
-3. Create the mysql schema;
-4. Set the correct value in `config.php` (server, username, password, database);
-5. Connect to `http://localhost/install.php` and press the button `Install`;
-6. Once completed go to `http://localhost/index.php` and connect with `admin/admin`;
-
-## How to update
-- To update the web version download the current release;
-- To update the db go to Settings and press update.
+- Per aggiornare il db ainstallare gli sql mancanti dalla cartella install-update.
 
 ## Thanks to
-- http://getbootstrap.com/
-- https://developers.google.com/chart/
-- https://datatables.net/
-- http://jscolor.com/
-- http://keen.github.io/dashboards/
-- https://github.com/mistic100/RandomColor.php
-- http://markusslima.github.io/bootstrap-filestyle/
+- Font Awesome Free 5.10.2 (https://fontawesome.com)
+- Tabulator 4.7.2 (http://tabulator.info/)
+- SB Admin 2 4.0.7 (https://startbootstrap.com/template-overviews/sb-admin-2)
+- Bootstrap 4.3.1 (https://getbootstrap.com/)
+- Chart.js 2.8.0 (https://www.chartjs.org)
+- jQuery 3.5.1 (https://jquery.com/)
+- jQuery Easing 1.4.1 (http://gsgd.co.uk/sandbox/jquery/easing/)
+- moment.js 2.28.0 (http://momentjs.com)
