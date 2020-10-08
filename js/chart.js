@@ -189,7 +189,7 @@ var movementsMonth = new Chart(ctx, {
 		  padding: 10,
 		  // Include a dollar sign in the ticks
 		  callback: function(value, index, values) {
-			return '€' + number_format(value);
+			return '\u20AC ' + number_format(value);
 		  }
 		},
 		gridLines: {

@@ -19,6 +19,45 @@ function myHandler() {
   }
 }
 
+//return first letter capitalized
+function ucfirst(string){
+	return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+//category retrive
+function getCategory(){
+	$.getJSON('action/data.php?categories=true', function(json) {
+		for (x in json) {
+			categoryObj[json[x].cat_id]=json[x].cat_name;
+		}
+	});
+	
+	if(debug){console.log(categoryObj);}
+}
+
+getCategory();
+
+function printCategory(){
+	return categoryObj;
+}
+
+//user retrive
+function getUser(){
+	$.getJSON('action/data.php?users=true', function(json) {
+		for (x in json) {
+			userObj[json[x].usr_id]=ucfirst(json[x].usr_id);
+		}
+	});
+	
+	if(debug){console.log(userObj);}
+}
+
+getUser();
+
+function printUser(){
+	return userObj;
+}
+
 //date editor
 var dateEditor = function(cell, onRendered, success, cancel){
     var cellValue = moment(cell.getValue(), "YYYY-MM-DD").format('YYYY-MM-DD'),
@@ -97,7 +136,7 @@ const table = new Tabulator("#movements-table", {
 			myRequest.open("POST","action/editor.php");
 			myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			myRequest.send("pk="+id+"&col="+col+"&value="+value+"&action=mov-edit");
-			table.setData();
+			//table.setData();
 		}else{
 			var cat_id = cell._cell.row.data.cat_id;
 			var dat_mov = cell._cell.row.data.dat_mov;
@@ -114,7 +153,7 @@ const table = new Tabulator("#movements-table", {
 				myRequest.open("POST","action/editor.php");
 				myRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 				myRequest.send("cat="+cat_id+"&value="+val+"&usr="+usr_mov+"&note="+note+"&date="+dat_mov+"&action=mov-save");
-				table.setData();
+				//table.setData();
 			}else{
 				if(debug){console.log('no complete data');}
 			}
@@ -145,47 +184,3 @@ document.getElementById("delete").addEventListener("click", function(){
 	}
 	table.setData();
 });
-
-//category retrive
-function getCategory(){
-	myRequest = CreateXmlHttpReq(myHandler);
-	myRequest.open("GET","action/data.php?categories=true", false);
-	myRequest.send();
-	tempObj = JSON.parse(myRequest.responseText);
-	
-	for (x in tempObj) {
-		categoryObj[tempObj[x].cat_id]=tempObj[x].cat_name;
-	}
-	
-	if(debug){console.log(categoryObj);}
-	
-	table.redraw();
-}
-
-getCategory();
-
-function printCategory(){
-	return categoryObj;
-}
-
-//user retrive
-function getUser(){
-	myRequest = CreateXmlHttpReq(myHandler);
-	myRequest.open("GET","action/data.php?users=true", false);
-	myRequest.send();
-	tempObj = JSON.parse(myRequest.responseText);
-	
-	for (x in tempObj) {
-		userObj[tempObj[x].usr_id]=tempObj[x].usr_id;
-	}
-	
-	if(debug){console.log(userObj);}
-	
-	table.redraw();
-}
-
-getUser();
-
-function printUser(){
-	return userObj;
-}

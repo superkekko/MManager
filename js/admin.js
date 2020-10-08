@@ -19,18 +19,45 @@ function myHandler() {
   }
 }
 
+//return first letter capitalized
+function ucfirst(string){
+	return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+//category retrive
+function getCategory(){
+	$.getJSON('action/data.php?categories=true', function(json) {
+		for (x in json) {
+			categoryObj[json[x].cat_id]=json[x].cat_name;
+		}
+	});
+	
+	categoryObj[9999]='Undefined';
+	
+	if(debug){console.log(categoryObj);}
+}
+
+getCategory();
+
+function printCategory(){
+	return categoryObj;
+}
+
 //user retrive
 function getUser(){
-	myRequest = CreateXmlHttpReq(myHandler);
-	myRequest.open("GET","action/data.php?users=true", false);
-	myRequest.send();
-	tempObj = JSON.parse(myRequest.responseText);
-	
-	for (x in tempObj) {
-		userObj[tempObj[x].usr_id]=tempObj[x].usr_id;
-	}
+	$.getJSON('action/data.php?users=true', function(json) {
+		for (x in json) {
+			userObj[json[x].usr_id]=ucfirst(json[x].usr_id);
+		}
+	});
 	
 	if(debug){console.log(userObj);}
+}
+
+getUser();
+
+function printUser(){
+	return userObj;
 }
 
 //date editor
@@ -266,27 +293,3 @@ document.getElementById("categories-delete").addEventListener("click", function(
 	}
 	categoriesTable.setData();
 });
-
-//category retrive
-function getCategory(){
-	myRequest = CreateXmlHttpReq(myHandler);
-	myRequest.open("GET","action/data.php?categories=true", false);
-	myRequest.send();
-	tempObj = JSON.parse(myRequest.responseText);
-	
-	categoryObj[9999]='Undefined';
-	
-	for (x in tempObj) {
-		categoryObj[tempObj[x].cat_id]=tempObj[x].cat_name;
-	}
-	
-	if(debug){console.log(categoryObj);}
-	
-	categoriesTable.redraw();
-}
-
-getCategory();
-
-function printCategory(){
-	return categoryObj;
-}
