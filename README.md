@@ -16,7 +16,7 @@ Un semplice gestore delle spese famigliari
 ## Thanks to
 - Font Awesome Free 5.10.2 (https://fontawesome.com)
 - Tabulator 4.7.2 (http://tabulator.info/)
-- SB Admin 2 4.0.7 (https://startbootstrap.com/template-overviews/sb-admin-2)
+- SB Admin 2 4.0.7 (https://startbootstrap.com/theme/sb-admin-2)
 - Bootstrap 4.3.1 (https://getbootstrap.com/)
 - Chart.js 2.8.0 (https://www.chartjs.org)
 - jQuery 3.5.1 (https://jquery.com/)
