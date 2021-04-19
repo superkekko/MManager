@@ -1,5 +1,5 @@
 //enable debug console logs
-var debug = false;
+var debug = true;
 
 //ajax calls
 var myRequest = null;
@@ -27,6 +27,7 @@ function getMovements(){
 	if(debug){console.log(movementsObj);}
 }
 getMovements();
+
 
 //get positive value
 var valPos = [0,0,0,0,0,0];
